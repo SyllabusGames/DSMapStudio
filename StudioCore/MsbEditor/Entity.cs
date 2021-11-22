@@ -951,12 +951,14 @@ namespace StudioCore.MsbEditor
         {
             Container = map;
             WrappedObject = msbo;
+            UseDrawGroups = Drawgroups != null;
         }
 
         public MapEntity(ObjectContainer map, object msbo, MapEntityType type)
         {
             Container = map;
             WrappedObject = msbo;
+            UseDrawGroups = Drawgroups != null;
             Type = type;
             if (!(msbo is PARAM.Row) && !(msbo is MergedParamRow))
             {
