@@ -295,6 +295,7 @@ namespace StudioCore.MsbEditor
         {
             if (!_isMEditPopupOpen && !_isShortcutPopupOpen && !_isSearchBarActive)// Are shortcuts active? Presently just checks for massEdit popup.
             {
+
                 // Keyboard shortcuts
                 if (EditorActionManager.CanUndo() && InputTracker.GetControlShortcut(Key.Z))
                 {
@@ -304,6 +305,7 @@ namespace StudioCore.MsbEditor
                 {
                     EditorActionManager.RedoAction();
                 }
+
                 if (!ImGui.IsAnyItemActive() && _activeView._selection.paramSelectionExists() && InputTracker.GetControlShortcut(Key.A))
                 {
                     _clipboardParam = _activeView._selection.getActiveParam();
@@ -458,6 +460,7 @@ namespace StudioCore.MsbEditor
                 {
                     if (view == null)
                         continue;
+
                     string name = view._selection.rowSelectionExists() ? view._selection.getActiveRow().Name : null;
                     string toDisplay = (view == _activeView ? "**" : "") + (name == null || name.Trim().Equals("") ? "Param Editor View" : name) + (view == _activeView ? "**" : "");
                     ImGui.SetNextWindowSize(new Vector2(1280.0f, 720.0f), ImGuiCond.Once);
@@ -587,7 +590,8 @@ namespace StudioCore.MsbEditor
     internal class ParamEditorSelectionState
     {
         private static string _globalSearchString = "";
-        private string _activeParam = null;
+        public string _activeParam = null;
+        //private string _activeParam = null;
         private Dictionary<string, ParamEditorParamSelectionState> _paramStates = new Dictionary<string, ParamEditorParamSelectionState>();
 
         public bool paramSelectionExists()
@@ -754,7 +758,7 @@ namespace StudioCore.MsbEditor
                 }
 
                 scrollTo = 0;
-                foreach (var r in p)
+                foreach (var r in p)//		--------------------------------------------		[   For each middle column row    ]		--------------------------------------------
                 {
                     if (ImGui.Selectable($@"{r.ID} {r.Name}", _selection.getSelectedRows().Contains(r)))
                     {
@@ -792,7 +796,9 @@ namespace StudioCore.MsbEditor
                     ImGui.SetScrollFromPosY(scrollTo - ImGui.GetScrollY());
             }
             ImGui.EndChild();
+            string _noSearchStr = null;
             ImGui.NextColumn();
+            //		--------------------------------------------		[   Show Properties Of Selected Row    ]		--------------------------------------------
             if (!_selection.rowSelectionExists())
             {
                 ImGui.BeginChild("columnsNONE");
@@ -801,7 +807,7 @@ namespace StudioCore.MsbEditor
             else
             {
                 ImGui.BeginChild("columns"+_selection.getActiveParam());
-                _propEditor.PropEditorParamRow(_selection.getActiveRow());
+                _propEditor.PropEditorParamRow(_selection.getActiveRow(), ref _noSearchStr);
             }
             ImGui.EndChild();
         }
