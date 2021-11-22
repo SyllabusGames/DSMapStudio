@@ -42,10 +42,10 @@ namespace StudioCore
         public Matrix4x4 MatrixWorld;
         public Matrix4x4 MatrixProjection;
 
-        public float FieldOfView = 43;
         //		The clip planes should be taken from Viewport.cs if I can get a reference to it.
-        public float NearClip = 0.1f;
-        public float FarClip = 20000;
+        public static float NearClip = 0.1f;
+        public static float FarClip = 20000;
+        public static float FieldOfView = 60;
 
         public float CameraTurnSpeedGamepad = 1.5f * 0.1f;
         public float CameraTurnSpeedMouse = 1.5f * 0.25f;
@@ -62,6 +62,9 @@ namespace StudioCore
             CameraTransform.Rotation = new Quaternion(Settings.CameraRotX , Settings.CameraRotY , Settings.CameraRotZ , Settings.CameraRotW);
             OrbitCamCenter = new Vector3(Settings.CameraOrbitCenterX , Settings.CameraOrbitCenterY , Settings.CameraOrbitCenterZ);
             OrbitCamDistance = Settings.OrbitCamDistance;
+            NearClip = Settings.NearClipPlane;
+            FarClip = Settings.FarClipPlane;
+            FieldOfView = Settings.FieldOfView;
         }
 
         public void ResetCameraLocation()
@@ -131,6 +134,9 @@ namespace StudioCore
                 Settings.CameraRotation = CameraTransform.Rotation;
                 Settings.CameraOrbitCenter = OrbitCamCenter;
                 Settings.OrbitCamDistance = OrbitCamDistance;
+                Settings.NearClipPlane = NearClip;
+                Settings.FarClipPlane = FarClip;
+                Settings.FieldOfView = FieldOfView;
             }
         }
 

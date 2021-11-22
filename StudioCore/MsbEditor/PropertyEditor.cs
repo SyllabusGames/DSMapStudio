@@ -23,13 +23,16 @@ namespace StudioCore.MsbEditor
         private object _changingPropery = null;
         private Action _lastUncommittedAction = null;
 
+        private WorldView _worldView;//		Used to set camera properties
+
         bool softlockRemovalOfBugReport = true;
 
         private string _refContextCurrentAutoComplete = "";
-
-        public PropertyEditor(ActionManager manager)
+        
+        public PropertyEditor(ActionManager manager, WorldView worldView = null)
         {
             ContextActionManager = manager;
+            _worldView = worldView;
         }
 
         private bool PropertyRow(Type typ, object oldval, out object newval, bool isBool, Entity obj=null, string propname=null)
@@ -1129,9 +1132,27 @@ namespace StudioCore.MsbEditor
             ImGui.Begin($@"Properties##{id}");
             ImGui.BeginChild("propedit");
             string _noSearchStr = null;
-            if (selection == null || selection.WrappedObject == null)
+           if (selection == null || selection.WrappedObject == null)
             {
                 ImGui.Text("Select a single object to edit properties.");
+                if(_worldView != null){
+                    if (ImGui.InputFloat("Near Clip", ref WorldView.NearClip))
+                    {
+                        WorldView.NearClip = Math.Clamp(WorldView.NearClip, 0.0001f, WorldView.FarClip);
+                    }
+                    if (ImGui.InputFloat("Far Clip", ref WorldView.FarClip))
+                    {
+                        WorldView.FarClip = Math.Clamp(WorldView.FarClip, WorldView.NearClip, 100000);
+                    }
+                    if (ImGui.SliderFloat("Field of View", ref WorldView.FieldOfView, 10, 160)){}
+
+                    if (ImGui.Button("Reset camera matrix"))
+                    {
+                        WorldView.NearClip = 0.1f;
+                        WorldView.FarClip = 20000;
+                        WorldView.FieldOfView = 60;
+                    }
+                }
                 ImGui.EndChild();
                 ImGui.End();
                 ImGui.PopStyleColor();

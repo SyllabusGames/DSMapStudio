@@ -35,9 +35,6 @@ namespace StudioCore.Gui
         public int Width;
         public int Height;
 
-        public float NearClip = 0.1f;
-        public float FarClip = 20000.0f;
-
         public bool DrawGrid { get; set; } = true;
 
         private DebugPrimitives.DbgPrimWireGrid ViewportGrid;
@@ -89,7 +86,7 @@ namespace StudioCore.Gui
 
             //RenderScene.AddObject(ViewportGrid);
 
-            _projectionMat = Utils.CreatePerspective(device, false, 60.0f * (float)Math.PI / 180.0f, (float)width / (float)height, NearClip, FarClip);
+            _projectionMat = Utils.CreatePerspective(device, false, WorldView.FieldOfView * (float)Math.PI / 180.0f, (float)width / (float)height, WorldView.NearClip, WorldView.FarClip);
             _frustum = new BoundingFrustum(_projectionMat);
             _actionManager = am;
 
@@ -266,13 +263,18 @@ namespace StudioCore.Gui
                 }
             }
 
+            if (InputTracker.GetKey(Key.Escape) && MouseInViewport())
+            {
+                _selection.ClearSelection();
+            }
+
             //Gizmos.DebugGui();
             return kbbusy;
         }
 
         public void Draw(GraphicsDevice device, CommandList cl)
         {
-            _projectionMat = Utils.CreatePerspective(device, true, 60.0f * (float)Math.PI / 180.0f, (float)Width / (float)Height, NearClip, FarClip);
+            _projectionMat = Utils.CreatePerspective(device, true, WorldView.FieldOfView * (float)Math.PI / 180.0f, (float)Width / (float)Height, WorldView.NearClip, WorldView.FarClip);
             _frustum = new BoundingFrustum(_worldView.CameraTransform.CameraViewMatrixLH * _projectionMat);
             _viewPipeline.TestUpdateView(_projectionMat, _worldView.CameraTransform.CameraViewMatrixLH, _worldView.CameraTransform.Position, _cursorX, _cursorY);
             _viewPipeline.RenderScene(_frustum);
@@ -309,7 +311,8 @@ namespace StudioCore.Gui
             var radius = Vector3.Distance(box.Max, box.Min);
             _worldView.CameraTransform.Position = pos - (camdir * radius);
             _worldView.OrbitCamCenter = pos;
-            _worldView.OrbitCamDistance = Math.Max(radius , _worldView.NearClip);
+            _worldView.OrbitCamDistance = Math.Max(radius , WorldView.NearClip);
+            WorldView.FarClip = Math.Max(radius*1.2f , WorldView.FarClip);//		Don't let the camera focus something too big to see
         }
     }
 }

@@ -78,7 +78,7 @@ namespace StudioCore.MsbEditor
             Universe = new Universe(AssetLocator, RenderScene, _selection);
 
             SceneTree = new SceneTree(SceneTree.Configuration.MapEditor, this, "mapedittree", Universe, _selection, EditorActionManager, Viewport, AssetLocator);
-            PropEditor = new PropertyEditor(EditorActionManager);
+            PropEditor = new PropertyEditor(EditorActionManager, Viewport._worldView);
             DispGroupEditor = new DisplayGroupsEditor(RenderScene, _selection);
             PropSearch = new SearchProperties(Universe);
             NavMeshEditor = new NavmeshEditor(locator, RenderScene, _selection);
@@ -166,8 +166,8 @@ namespace StudioCore.MsbEditor
             var newent = typ.GetConstructor(Type.EmptyTypes).Invoke(new object[0]);
 
             var map = Universe.LoadedObjectContainers.Values.First((x) => x != null);
-			if(map == null)
-				return;
+            if(map == null)
+                return;
 
             var obj = new MapEntity(map, newent, etype);
 
@@ -444,7 +444,7 @@ namespace StudioCore.MsbEditor
                     {
                         Gizmos.Origin = Gizmos.GizmosOrigin.BoundingBox;
                     }
-					else
+                    else
                     {
                         Gizmos.Origin = Gizmos.GizmosOrigin.World;
                     }
@@ -455,7 +455,7 @@ namespace StudioCore.MsbEditor
                     {
                         Gizmos.Space = Gizmos.GizmosSpace.Local;
                     }
-					else
+                    else
                     {
                         Gizmos.Space = Gizmos.GizmosSpace.World;
                     }
@@ -463,28 +463,28 @@ namespace StudioCore.MsbEditor
 
                 if (InputTracker.GetKeyDown(Key.H))//		Hide selected objects
                 {
-					if (InputTracker.GetKey(Key.AltLeft) || InputTracker.GetKey(Key.AltRight))//		Unhide and select everything
-					{
-						foreach (ObjectContainer map in Universe.LoadedObjectContainers.Values)//		For each map loaded
-						{
-							if(map != null){
-								foreach(Entity en in map.Objects){
-									if(!en.EditorVisible){//		Object is hidden
-										en.EditorVisible = true;
-										_selection.AddSelection(en);
-									}
-								}
-							}
-						}
-					}
-					else
-					{
-						foreach(Entity selected in _selection.GetFilteredSelection<Entity>())
-						{
-							selected.EditorVisible = false;
-						}
-						_selection.ClearSelection();
-					}
+                    if (InputTracker.GetKey(Key.AltLeft) || InputTracker.GetKey(Key.AltRight))//		Unhide and select everything
+                    {
+                        foreach (ObjectContainer map in Universe.LoadedObjectContainers.Values)//		For each map loaded
+                        {
+                            if(map != null){
+                                foreach(Entity en in map.Objects){
+                                    if(!en.EditorVisible){//		Object is hidden
+                                        en.EditorVisible = true;
+                                        _selection.AddSelection(en);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        foreach(Entity selected in _selection.GetFilteredSelection<Entity>())
+                        {
+                            selected.EditorVisible = false;
+                        }
+                        _selection.ClearSelection();
+                    }
                 }
 
                 // F key frames the selection

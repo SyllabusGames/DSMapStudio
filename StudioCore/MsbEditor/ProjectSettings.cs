@@ -9,7 +9,7 @@ using System.Numerics;
 namespace StudioCore.MsbEditor
 {
     /// <summary>
-    /// Settings for a modding project. Gets serialized to JSON
+    /// Settings for a modding project. Gets serialized to JSON. (Only get;set; properties are saved, not fields)
     /// </summary>
     public class ProjectSettings
     {
@@ -32,9 +32,14 @@ namespace StudioCore.MsbEditor
 
         //		These fields are updated by WorldView.SetCameraLocation()
         public float OrbitCamDistance { get; set; } = 2;
+
         public Vector3 CameraPosition = new Vector3(0,0,0);//		Vector3s don't serialize properly
         public Quaternion CameraRotation = new Quaternion(0,0,0,1);
         public Vector3 CameraOrbitCenter = new Vector3(0,0,0);
+
+        public float NearClipPlane { get; set; } = 0.1f;
+        public float FarClipPlane { get; set; } = 20000f;
+        public float FieldOfView { get; set; } = 60f;
 
 
         /// <summary>

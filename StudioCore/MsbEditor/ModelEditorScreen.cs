@@ -46,7 +46,7 @@ namespace StudioCore.MsbEditor
             _universe = new Universe(AssetLocator, RenderScene, _selection);
 
             _sceneTree = new SceneTree(SceneTree.Configuration.ModelEditor, this, "modeledittree", _universe, _selection, EditorActionManager, Viewport, AssetLocator);
-            _propEditor = new PropertyEditor(EditorActionManager);
+            _propEditor = new PropertyEditor(EditorActionManager, Viewport._worldView);
             _assetBrowser = new AssetBrowser(this, "modelEditorBrowser", AssetLocator);
         }
 
@@ -72,8 +72,8 @@ namespace StudioCore.MsbEditor
                     Viewport._worldView.CameraMoveSpeedSlow = basespeed / 10.0f;
                     Viewport._worldView.CameraMoveSpeedFast = basespeed * 10.0f;
 
-                    Viewport.FarClip = Math.Max(10.0f, maxdim * 10.0f);
-                    Viewport.NearClip = Math.Max(0.001f, maxdim / 10000.0f);
+                    //Viewport._worldView.FarClip = Math.Max(10.0f, maxdim * 10.0f);
+                    //Viewport._worldView.NearClip = Math.Max(0.001f, maxdim / 10000.0f);
                 }
 
                 if (_flverhandle.IsLoaded && _flverhandle.Get() != null)
