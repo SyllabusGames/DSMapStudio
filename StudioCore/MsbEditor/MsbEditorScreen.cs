@@ -166,6 +166,9 @@ namespace StudioCore.MsbEditor
             var newent = typ.GetConstructor(Type.EmptyTypes).Invoke(new object[0]);
 
             var map = Universe.LoadedObjectContainers.Values.First((x) => x != null);
+			if(map == null)
+				return;
+
             var obj = new MapEntity(map, newent, etype);
 
             var act = new AddMapObjectsAction(Universe, (Map)map, RenderScene, new List<MapEntity> { obj }, true);
@@ -355,11 +358,11 @@ namespace StudioCore.MsbEditor
                 }
                 if (ImGui.BeginMenu("Space"))
                 {
-                    if (ImGui.MenuItem("Local", "", Gizmos.Space == Gizmos.GizmosSpace.Local))
+                    if (ImGui.MenuItem("Local", "X", Gizmos.Space == Gizmos.GizmosSpace.Local))
                     {
                         Gizmos.Space = Gizmos.GizmosSpace.Local;
                     }
-                    if (ImGui.MenuItem("World", "", Gizmos.Space == Gizmos.GizmosSpace.World))
+                    if (ImGui.MenuItem("World", "X", Gizmos.Space == Gizmos.GizmosSpace.World))
                     {
                         Gizmos.Space = Gizmos.GizmosSpace.World;
                     }
@@ -367,11 +370,11 @@ namespace StudioCore.MsbEditor
                 }
                 if (ImGui.BeginMenu("Origin"))
                 {
-                    if (ImGui.MenuItem("World", "", Gizmos.Origin == Gizmos.GizmosOrigin.World))
+                    if (ImGui.MenuItem("World", "Z", Gizmos.Origin == Gizmos.GizmosOrigin.World))
                     {
                         Gizmos.Origin = Gizmos.GizmosOrigin.World;
                     }
-                    if (ImGui.MenuItem("Bounding Box", "", Gizmos.Origin == Gizmos.GizmosOrigin.BoundingBox))
+                    if (ImGui.MenuItem("Bounding Box", "Z", Gizmos.Origin == Gizmos.GizmosOrigin.BoundingBox))
                     {
                         Gizmos.Origin = Gizmos.GizmosOrigin.BoundingBox;
                     }
@@ -435,22 +438,53 @@ namespace StudioCore.MsbEditor
                 }
 
                 // Use home key to cycle between gizmos origin modes
-                if (InputTracker.GetKeyDown(Key.Home))
+                if (InputTracker.GetKeyDown(Key.Z) || InputTracker.GetKeyDown(Key.Home))//		Toggle origin location
                 {
                     if (Gizmos.Origin == Gizmos.GizmosOrigin.World)
                     {
                         Gizmos.Origin = Gizmos.GizmosOrigin.BoundingBox;
                     }
-                    else if (Gizmos.Origin == Gizmos.GizmosOrigin.BoundingBox)
+					else
                     {
                         Gizmos.Origin = Gizmos.GizmosOrigin.World;
                     }
                 }
-
-                // Hide/Show
-                if (InputTracker.GetControlShortcut(Key.H) && _selection.IsSelection())
+                if (InputTracker.GetKeyDown(Key.X))//		Toggle world/local space
                 {
-                    HideShowSelection();
+                    if (Gizmos.Space == Gizmos.GizmosSpace.World)
+                    {
+                        Gizmos.Space = Gizmos.GizmosSpace.Local;
+                    }
+					else
+                    {
+                        Gizmos.Space = Gizmos.GizmosSpace.World;
+                    }
+                }
+
+                if (InputTracker.GetKeyDown(Key.H))//		Hide selected objects
+                {
+					if (InputTracker.GetKey(Key.AltLeft) || InputTracker.GetKey(Key.AltRight))//		Unhide and select everything
+					{
+						foreach (ObjectContainer map in Universe.LoadedObjectContainers.Values)//		For each map loaded
+						{
+							if(map != null){
+								foreach(Entity en in map.Objects){
+									if(!en.EditorVisible){//		Object is hidden
+										en.EditorVisible = true;
+										_selection.AddSelection(en);
+									}
+								}
+							}
+						}
+					}
+					else
+					{
+						foreach(Entity selected in _selection.GetFilteredSelection<Entity>())
+						{
+							selected.EditorVisible = false;
+						}
+						_selection.ClearSelection();
+					}
                 }
 
                 // F key frames the selection
