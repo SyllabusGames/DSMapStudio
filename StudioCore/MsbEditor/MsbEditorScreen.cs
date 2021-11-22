@@ -622,6 +622,7 @@ namespace StudioCore.MsbEditor
             Universe.UnloadAllMaps();
             GC.Collect();
             Universe.PopulateMapList();
+            Viewport._worldView.LoadSettings(newSettings);
 
             if (AssetLocator.Type != GameType.Undefined)
             {

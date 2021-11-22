@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Numerics;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Veldrid;
 using Veldrid.Sdl2;
 
@@ -11,20 +7,19 @@ namespace StudioCore
 {
     public class WorldView
     {
-        public bool DisableAllInput = false;
-
+        //	These camera properties are used by Viewport.Draw()
         public Transform CameraTransform = Transform.Default;
-        public Transform CameraOrigin = Transform.Default;
         public Transform CameraPositionDefault = Transform.Default;
         public float OrbitCamDistance = 12;
         public float ModelHeight_ForOrbitCam = 1;
         public float ModelDepth_ForOrbitCam = 1;
-        public Vector3 ModelCenter_ForOrbitCam = Vector3.Zero;
         public Vector3 OrbitCamCenter = new Vector3(0, 0.5f, 0);
 
         private Rectangle BoundingRect;
 
         public Matrix4x4 WorldMatrixMOD = Matrix4x4.Identity;
+
+        public MsbEditor.ProjectSettings Settings;
 
         public WorldView(Rectangle bounds)
         {
@@ -48,9 +43,10 @@ namespace StudioCore
         public Matrix4x4 MatrixProjection;
 
         public float FieldOfView = 43;
-        public float NearClipDistance = 0.1f;
-        public float FarClipDistance = 2000;
-        public float SHITTY_CAM_ZOOM_MIN_DIST = 0.2f;
+        //		The clip planes should be taken from Viewport.cs if I can get a reference to it.
+        public float NearClip = 0.1f;
+        public float FarClip = 20000;
+
         public float CameraTurnSpeedGamepad = 1.5f * 0.1f;
         public float CameraTurnSpeedMouse = 1.5f * 0.25f;
 
@@ -58,13 +54,20 @@ namespace StudioCore
         public float CameraMoveSpeedFast = 200.0f;
         public float CameraMoveSpeedSlow = 1.0f;
 
-        public static readonly Vector3 CameraDefaultPos = new Vector3(0, 0.25f, -5);
-        public static readonly Vector3 CameraDefaultRot = new Vector3(0, 0, 0);
+
+        public void LoadSettings (MsbEditor.ProjectSettings Settings)
+        {
+            this.Settings = Settings;
+            CameraTransform.Position = new Vector3(Settings.CameraPosX , Settings.CameraPosY , Settings.CameraPosZ);
+            CameraTransform.Rotation = new Quaternion(Settings.CameraRotX , Settings.CameraRotY , Settings.CameraRotZ , Settings.CameraRotW);
+            OrbitCamCenter = new Vector3(Settings.CameraOrbitCenterX , Settings.CameraOrbitCenterY , Settings.CameraOrbitCenterZ);
+            OrbitCamDistance = Settings.OrbitCamDistance;
+        }
 
         public void ResetCameraLocation()
         {
-            CameraTransform.Position = CameraDefaultPos;
-            CameraTransform.EulerRotation = CameraDefaultRot;
+            CameraTransform.Position = Vector3.Zero;
+            CameraTransform.Rotation = Quaternion.Identity;
         }
 
         public void LookAtTransform(Transform t)
@@ -116,27 +119,19 @@ namespace StudioCore
             return result;
         }
 
-        public void SetCameraLocation(Vector3 pos, Vector3 rot)
-        {
-            CameraTransform.Position = pos;
-            CameraTransform.EulerRotation = rot;
-        }
-
-        public void UpdateMatrices()
-        {
-            MatrixWorld = Matrix4x4.CreateRotationY(Utils.Pi)
-                * Matrix4x4.CreateTranslation(0, 0, 0)
-                * Matrix4x4.CreateScale(-1, 1, 1)
-                // * Matrix.Invert(CameraOrigin.ViewMatrix)
-                ;
-
-        }
-
         public void MoveCamera(float x, float y, float z, float speed)
         {
             CameraTransform.Position += Vector3.Transform(new Vector3(x, y, z),
                 CameraTransform.Rotation
                 ) * speed;
+            
+            if (Settings != null)//		Record camera orientation in Map Editor, not model editor
+            {
+                Settings.CameraPosition = CameraTransform.Position;
+                Settings.CameraRotation = CameraTransform.Rotation;
+                Settings.CameraOrbitCenter = OrbitCamCenter;
+                Settings.OrbitCamDistance = OrbitCamDistance;
+            }
         }
 
         public void UpdateOrbitCameraCenter()//		Set the OrbitCamCenter to be the position OrbitCamDistance in front of the camera
@@ -154,26 +149,6 @@ namespace StudioCore
             CameraTransform.Position = OrbitCamCenter - Vector3.Transform(new Vector3(0, 0, OrbitCamDistance),
                 CameraTransform.Rotation);
         }
-        /*
-        public void MoveCamera_OrbitCenterPoint(float x, float y, float z, float speed)
-        {
-            OrbitCamCenter += (Vector3.Transform(new Vector3(x, y, z),
-                Matrix4x4.CreateRotationX(-CameraTransform.EulerRotation.X)
-                * Matrix4x4.CreateRotationY(-CameraTransform.EulerRotation.Y)
-                * Matrix4x4.CreateRotationZ(-CameraTransform.EulerRotation.Z)
-                ) * speed) * (OrbitCamDistance * OrbitCamDistance) * 0.5f;
-        }*/
-
-        public void PointCameraToLocation(Vector3 location)
-        {
-            var newLookDir = Vector3.Normalize(location - (CameraTransform.Position));
-            var eu = CameraTransform.EulerRotation;
-            eu.Y = (float)Math.Atan2(newLookDir.X, newLookDir.Z);
-            eu.X = (float)Math.Asin(newLookDir.Y);
-            eu.Z = 0;
-            CameraTransform.EulerRotation = eu;
-        }
-
 
         private Vector2 mousePos = Vector2.Zero;
         private Vector2 oldMouse = Vector2.Zero;
@@ -188,24 +163,8 @@ namespace StudioCore
         private bool shiftWasHeldBeforeClickM = false;
         private MouseClickType currentClickType = MouseClickType.None;
         private MouseClickType oldClickType = MouseClickType.None;
-        //軌道カムトグルキー押下
-       // bool oldOrbitCamToggleKeyPressed = false;
-        //非常に悪いカメラピッチ制限    ファトキャット
-        const float SHITTY_CAM_PITCH_LIMIT_FATCAT = 0.999f;
-        //非常に悪いカメラピッチ制限リミッタ    ファトキャット
-        const float SHITTY_CAM_PITCH_LIMIT_FATCAT_CLAMP = 0.999f;
 
         private bool oldResetKeyPressed = false;
-
-        private float GetGamepadTriggerDeadzone(float t, float d)
-        {
-            if (t < d)
-                return 0;
-            else if (t >= 1)
-                return 0;
-
-            return (t - d) * (1.0f / (1.0f - d));
-        }
 
         public enum MouseClickType
         {
@@ -217,22 +176,16 @@ namespace StudioCore
             Extra2,
         }
 
-        private bool MousePressed = false;
+        private bool MousePressed = false;//		Not sure what this is. = Mouse confined to window maybe
         private Vector2 MousePressedPos = new Vector2();
 
         public bool UpdateInput(Sdl2Window window, float dt)
         {
-            if (DisableAllInput)
-            {
-                //oldWheel = Mouse.GetState(game.Window).ScrollWheelValue;
-                return false;
-            }
 
             float clampedLerpF = Utils.Clamp(30 * dt, 0, 1);
 
             mousePos = new Vector2(Utils.Lerp(oldMouse.X, InputTracker.MousePosition.X, clampedLerpF),
                 Utils.Lerp(oldMouse.Y, InputTracker.MousePosition.Y, clampedLerpF));
-
 
 
             //KeyboardState keyboard = DBG.EnableKeyboardInput ? Keyboard.GetState() : DBG.DisabledKeyboardState;
@@ -255,18 +208,29 @@ namespace StudioCore
             else
                 currentClickType = MouseClickType.None;
             
-            //		Zoom controls (This code must be above the return or zooming will only work while holding a mouse button)
+            bool isResetKeyPressed = InputTracker.GetKey(Veldrid.Key.R);
+
+            if (isResetKeyPressed && !oldResetKeyPressed)
+            {
+                ResetCameraLocation();
+            }
+
+            oldResetKeyPressed = isResetKeyPressed;
+
+
+            //		Zoom controls (It's up here so we don't have to mess with mouse position stuff when just zooming)
             int mouseWheel = Math.Sign(InputTracker.GetMouseWheelDelta());
             if (mouseWheel != 0)
             {
-                //		Multiplying the change by OrbitCamDistance will make zooming finer when close to the OrbitCamCenter
-                OrbitCamDistance = Math.Min(Math.Max(OrbitCamDistance -0.15f*mouseWheel*OrbitCamDistance , SHITTY_CAM_ZOOM_MIN_DIST) , FarClipDistance);
+                //		Multiplying the change by OrbitCamDistance will make zooming finer when zoomed in
+                OrbitCamDistance = Math.Min(Math.Max(OrbitCamDistance -0.15f*mouseWheel*OrbitCamDistance , NearClip) , FarClip);
                 RotateOrbitCamera(0, 0, 0);//		Rotate nowhere to update camera distance to OrbitCamCenter
             }
 
             currentMouseClickL = currentClickType == MouseClickType.Left;
             currentMouseClickR = currentClickType == MouseClickType.Right;
             currentMouseClickM = currentClickType == MouseClickType.Middle;
+            
 
             if (currentClickType != MouseClickType.None && oldClickType == MouseClickType.None)
                 currentMouseClickStartedInWindow = true;
@@ -291,9 +255,7 @@ namespace StudioCore
 
             bool isSpeedupKeyPressed = InputTracker.GetKey(Veldrid.Key.LShift) || InputTracker.GetKey(Veldrid.Key.RShift);
             bool isSlowdownKeyPressed = InputTracker.GetKey(Veldrid.Key.LControl) || InputTracker.GetKey(Veldrid.Key.RControl);
-            bool isResetKeyPressed = InputTracker.GetKey(Veldrid.Key.R);
             bool isMoveLightKeyPressed = InputTracker.GetKey(Veldrid.Key.Space);
-            bool isPointCamAtObjectKeyPressed = false;// keyboard.IsKeyDown(Microsoft.Xna.Framework.Input.Keys.T);
 
 
             if (!currentMouseClickStartedInWindow)
@@ -303,6 +265,7 @@ namespace StudioCore
                 var euler = CameraTransform.EulerRotation;
                 euler.X = Utils.Clamp(CameraTransform.EulerRotation.X, -Utils.PiOver2, Utils.PiOver2);
                 CameraTransform.EulerRotation = euler;
+             //   }
 
                 LightRotation.X = Utils.Clamp(LightRotation.X, -Utils.PiOver2, Utils.PiOver2);
 
@@ -316,18 +279,6 @@ namespace StudioCore
             }
 
 
-            if (isResetKeyPressed && !oldResetKeyPressed)
-            {
-                ResetCameraLocation();
-            }
-
-            oldResetKeyPressed = isResetKeyPressed;
-
-            if (isPointCamAtObjectKeyPressed)
-            {
-                PointCameraToLocation(CameraPositionDefault.Position);
-            }
-
             float moveMult = dt * CameraMoveSpeed;
 
             if (isSpeedupKeyPressed)
@@ -340,6 +291,7 @@ namespace StudioCore
                 moveMult = dt * CameraMoveSpeedSlow;
             }
             
+           
             float x = 0;
             float y = 0;
             float z = 0;
@@ -360,7 +312,7 @@ namespace StudioCore
             MoveCamera(x, y, z, moveMult);
             UpdateOrbitCameraCenter();
             
-
+           
             if (currentMouseClickR || currentMouseClickM)
             {
                 if (!MousePressed)//		First frame of mouse press
@@ -403,7 +355,6 @@ namespace StudioCore
 
                         if (isMoveLightKeyPressed)
                         {
-                            camV = Math.Max(camV, 0);
                             LightRotation.Y += camH;
                             LightRotation.X -= camV;
                         }
@@ -416,11 +367,12 @@ namespace StudioCore
                             UpdateOrbitCameraCenter();
                         }
                     }
-                    else if (currentMouseClickM)//	Orbit/Pan camera
+                    else if (currentMouseClickM)//	Orbit camera
                     {
                         if (shiftWasHeldBeforeClickM){//	Pan
                             Vector3 cameraSpacePanDirection = new Vector3(camH, camV, 0);
-                            //		CameraMoveSpeed is not used so Msb and Model Editors work the same and movement speed is based on zoom. I hard coded 10 instead.
+                        //	Vector3 cameraSpacePanDirection = Vector3.Transform(new Vector3(camH, camV, 0), CameraTransform.Rotation);
+                        //		CameraMoveSpeed is not used so Msb and Model Editors work the same and movement speed is based on zoom. I hard coded 10 instead.
                             MoveCamera(cameraSpacePanDirection.X, cameraSpacePanDirection.Y, cameraSpacePanDirection.Z, OrbitCamDistance * dt * 10);
                             UpdateOrbitCameraCenter();
                         }

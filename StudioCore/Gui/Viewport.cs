@@ -36,7 +36,7 @@ namespace StudioCore.Gui
         public int Height;
 
         public float NearClip = 0.1f;
-        public float FarClip = 2000.0f;
+        public float FarClip = 20000.0f;
 
         public bool DrawGrid { get; set; } = true;
 
@@ -91,7 +91,7 @@ namespace StudioCore.Gui
 
             //RenderScene.AddObject(ViewportGrid);
 
-            _projectionMat = Utils.CreatePerspective(device, false, 60.0f * (float)Math.PI / 180.0f, (float)width / (float)height, 0.1f, 2000.0f);
+            _projectionMat = Utils.CreatePerspective(device, false, 60.0f * (float)Math.PI / 180.0f, (float)width / (float)height, NearClip, FarClip);
             _frustum = new BoundingFrustum(_projectionMat);
             _actionManager = am;
 
@@ -312,7 +312,7 @@ namespace StudioCore.Gui
             var radius = Vector3.Distance(box.Max, box.Min);
             _worldView.CameraTransform.Position = pos - (camdir * radius);
             _worldView.OrbitCamCenter = pos;
-            _worldView.OrbitCamDistance = Math.Max(radius , _worldView.SHITTY_CAM_ZOOM_MIN_DIST);
+            _worldView.OrbitCamDistance = Math.Max(radius , _worldView.NearClip);
         }
     }
 }

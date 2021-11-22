@@ -14,7 +14,7 @@ namespace StudioCore
 {
     public class MapStudioNew
     {
-        private static string _version = "Preview 11";
+        private static string _version = "Preview 12";
 
         private Sdl2Window _window;
         private GraphicsDevice _gd;
@@ -262,6 +262,7 @@ namespace StudioCore
             Resource.ResourceManager.Shutdown();
             _gd.Dispose();
             CFG.Save();
+            _projectSettings.Serialize(CFG.Current.LastProjectFile);
 
             System.Windows.Forms.Application.Exit();
         }
