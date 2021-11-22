@@ -57,8 +57,6 @@ namespace StudioCore.Gui
 
         private GraphicsDevice _device;
 
-        private bool _canInteract = false;
-
         private Scene.FullScreenQuad _clearQuad;
 
         private bool _vpvisible = false;
@@ -184,7 +182,6 @@ namespace StudioCore.Gui
                 {
                     ImGui.SetWindowFocus();
                 }
-                _canInteract = ImGui.IsWindowFocused();
                 _vpvisible = true;
                 var proj = Matrix4x4.Transpose(_projectionMat);
                 var view = Matrix4x4.Transpose(_worldView.CameraTransform.CameraViewMatrixLH);
@@ -237,11 +234,11 @@ namespace StudioCore.Gui
             _cursorX = (int)pos.X;// - X;
             _cursorY = (int)pos.Y;// - Y;
 
-            _gizmos.Update(ray, _canInteract && MouseInViewport());
+            _gizmos.Update(ray, MouseInViewport());
 
             bool kbbusy = false;
 
-            if (!_gizmos.IsMouseBusy() && _canInteract && MouseInViewport())
+            if (!_gizmos.IsMouseBusy() && MouseInViewport())
             {
                 kbbusy = _worldView.UpdateInput(window, dt);
                 if (InputTracker.GetMouseButtonDown(MouseButton.Left))
