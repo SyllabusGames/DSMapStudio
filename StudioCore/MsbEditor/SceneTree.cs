@@ -61,6 +61,48 @@ namespace StudioCore.MsbEditor
 
         private bool _setNextFocus = false;
 
+        public Dictionary<string, string> DS1NickNames = new Dictionary<string, string>(){
+            {"m10_00_00_00", "Depths"},
+            {"m10_01_00_00", "Undead Burg"},
+            {"m10_02_00_00", "Firelink Shrine"},
+            {"m11_00_00_00", "Painted World"},
+            {"m12_00_00_00", "Darkroot Garden"},
+            {"m12_01_00_00", "Oolacile/Abyss"},
+            {"m13_00_00_00", "Catacombs"},
+            {"m13_01_00_00", "Tomb of the Giants"},
+            {"m13_02_00_00", "Great Hollow/Ash Lake"},
+            {"m14_00_00_00", "Blighttown/Quelaag's"},
+            {"m14_01_00_00", "Demon Ruins/Lost Izalith"},
+            {"m15_00_00_00", "Sen's Fortress"},
+            {"m15_01_00_00", "Anor Londo"},
+            {"m16_00_00_00", "New Londo/Valley"},
+            {"m17_00_00_00", "Duke's Archives"},
+            {"m18_00_00_00", "Kiln of the First Flame"},
+            {"m18_01_00_00", "Undead Asylum"},
+        };
+        public Dictionary<string, string> DS3NickNames = new Dictionary<string, string>(){
+            {"m30_00_00_00", "High Wall of Lothric"},
+            {"m30_01_00_00", "Lothric Castle"},
+            {"m31_00_00_00", "Undead Settlement"},
+            {"m32_00_00_00", "Archdragon Peak"},
+            {"m33_00_00_00", "Road of Sacrifices/Faron"},
+            {"m34_01_00_00", "Lothric Castle"},
+            {"m35_00_00_00", "Cathedral of the Deep"},
+            {"m37_00_00_00", "Irithyll of the Boreal Valley"},
+            {"m38_00_00_00", "Smouldering  Lake"},
+            {"m39_00_00_00", "Irithyll Dungeon/Profaned Capital"},
+            {"m40_00_00_00", "Firelink Shrine"},
+            {"m41_00_00_00", "Kiln of the First Flame"},
+            {"m45_00_00_00", "Painted World of Ariandel"},
+            {"m46_00_00_00", "Arena: Grand Roof"},
+            {"m47_00_00_00", "Arena: Kiln of Flame"},
+            {"m50_00_00_00", "Dreg Heap"},
+            {"m51_00_00_00", "The Ringed City"},
+            {"m51_01_00_00", "Filianore's Rest"},
+            {"m53_00_00_00", "Arena: Dragon Ruins"},
+            {"m54_00_00_00", "Arena: Round Plaza"},
+        };
+
         public enum ViewMode
         {
             Hierarchy,
@@ -504,6 +546,8 @@ namespace StudioCore.MsbEditor
                 {
                     var map = lm.Value;
                     var mapid = lm.Key;
+                    string mapName = GetMapNickName(mapid);
+
                     var treeflags = ImGuiTreeNodeFlags.OpenOnArrow | ImGuiTreeNodeFlags.SpanAvailWidth;
                     if (map != null && _selection.GetSelection().Contains(map.RootObject))
                     {
@@ -511,14 +555,21 @@ namespace StudioCore.MsbEditor
                     }
                     bool nodeopen = false;
                     string unsaved = (map != null && map.HasUnsavedChanges) ? "*" : "";
-                    if (map != null)
+
+                    if (map != null)//		Create map (Parent) objects
                     {
                         nodeopen = ImGui.TreeNodeEx($@"{ForkAwesome.Cube} {mapid}", treeflags, $@"{ForkAwesome.Cube} {mapid}{unsaved}");
                     }
-                    else
+                    else//		Create map Load buttons
                     {
-                        ImGui.Selectable($@"   {ForkAwesome.Cube} {mapid}", false);
+                        ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(3,3));
+                        if(ImGui.Button($@" {ForkAwesome.Cube} {mapName}"))
+                        {
+                            _universe.LoadMap(mapid);
+                        }
+                        ImGui.PopStyleVar();
                     }
+
                     // Right click context menu
                     if (ImGui.BeginPopupContextItem($@"mapcontext_{mapid}"))
                     {
@@ -553,6 +604,36 @@ namespace StudioCore.MsbEditor
                         }
                         ImGui.EndPopup();
                     }
+                    
+                    //		Unload/Save Buttons
+                    if (map != null)//		Create elements in map
+                    {
+                        ImGui.SameLine();
+                        ImGui.BeginChild(mapName, new Vector2(120, 16));
+                        if (ImGui.Button("Unload"))
+                        {
+                            _selection.ClearSelection();
+                            _editorActionManager.Clear();
+                            pendingUnload = map as Map;
+                        }
+                        ImGui.SameLine();
+                        if (ImGui.Button("Save"))
+                    //	if (ImGui.Button("Save: " + mapName))
+                        {
+                            try
+                            {
+                                _universe.SaveMap(map as Map);
+                            }
+                            catch (SavingFailedException e)
+                            {
+                                System.Windows.Forms.MessageBox.Show(e.Wrapped.Message, e.Message,
+                                        System.Windows.Forms.MessageBoxButtons.OK,
+                                        System.Windows.Forms.MessageBoxIcon.None);
+                            }
+                        }
+                        ImGui.EndChild();
+                    }
+
                     if (ImGui.IsItemClicked() && map != null)
                     {
                         _pendingClick = map.RootObject;
@@ -658,6 +739,30 @@ namespace StudioCore.MsbEditor
             }
             ImGui.End();
             ImGui.PopStyleColor();
+        }
+
+        string GetMapNickName(string mapid){
+            switch(_assetLocator.Type)
+            {
+                case GameType.DemonsSouls:
+                    break;
+                case GameType.DarkSoulsPTDE:
+                case GameType.DarkSoulsRemastered:
+                    if(DS1NickNames.ContainsKey(mapid))
+                        return mapid + " - " + DS1NickNames[mapid];
+                    break;
+                case GameType.DarkSoulsIISOTFS:
+                    return mapid;
+                case GameType.DarkSoulsIII:
+                    if(DS3NickNames.ContainsKey(mapid))
+                        return mapid + " - " + DS3NickNames[mapid];
+                    break;
+                case GameType.Bloodborne:
+                    break;
+                case GameType.Sekiro:
+                    break;
+            }
+            return mapid;
         }
 
         public void OnActionEvent(ActionEvent evt)
