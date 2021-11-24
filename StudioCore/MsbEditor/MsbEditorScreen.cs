@@ -465,25 +465,13 @@ namespace StudioCore.MsbEditor
                 {
                     if (InputTracker.GetKey(Key.AltLeft) || InputTracker.GetKey(Key.AltRight))//		Unhide and select everything
                     {
-                        foreach (ObjectContainer map in Universe.LoadedObjectContainers.Values)//		For each map loaded
-                        {
-                            if(map != null){
-                                foreach(Entity en in map.Objects){
-                                    if(!en.EditorVisible){//		Object is hidden
-                                        en.EditorVisible = true;
-                                        _selection.AddSelection(en);
-                                    }
-                                }
-                            }
-                        }
+                        var action = new UnHideAllObjectsAction(Universe);
+                        EditorActionManager.ExecuteAction(action);
                     }
                     else
                     {
-                        foreach(Entity selected in _selection.GetFilteredSelection<Entity>())
-                        {
-                            selected.EditorVisible = false;
-                        }
-                        _selection.ClearSelection();
+                        var action = new HideObjectsAction(Universe, _selection.GetFilteredSelection<MapEntity>().ToList());
+                        EditorActionManager.ExecuteAction(action);
                     }
                 }
 

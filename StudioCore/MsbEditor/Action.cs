@@ -873,6 +873,90 @@ namespace StudioCore.MsbEditor
             return ActionEvent.NoEvent;
         }
     }
+    
+    public class HideObjectsAction : Action
+    {
+        private Universe Universe;
+        private List<MapEntity> HideThis = new List<MapEntity>();
+
+        public HideObjectsAction(Universe univ, List<MapEntity> objects)
+        {
+            Universe = univ;
+            HideThis.AddRange(objects);
+        }
+
+        public override ActionEvent Execute()
+        {
+            foreach (var obj in HideThis)
+            {
+                obj.EditorVisible = false;
+            }
+            Universe.Selection.ClearSelection();
+            return ActionEvent.NoEvent;
+        }
+
+        public override ActionEvent Undo()
+        {
+            for (int i = 0; i < HideThis.Count(); i++)
+            {
+                if (HideThis[i] == null)//		Object has been unloaded
+                {
+                    continue;
+                }
+                HideThis[i].EditorVisible = true;
+                Universe.Selection.AddSelection(HideThis[i]);
+            }
+            return ActionEvent.NoEvent;
+        }
+    }
+
+    public class UnHideAllObjectsAction : Action
+    {
+        private Universe Universe;
+        private List<Entity> UnhiddenObjects = new List<Entity>();//		The objects which were hidden before this was called
+        private HashSet<Entity> PreUnhideSelection = new HashSet<Entity>();
+
+        public UnHideAllObjectsAction(Universe univ)
+        {
+            Universe = univ;
+        }
+
+        public override ActionEvent Execute()
+        {
+            PreUnhideSelection = Universe.Selection.GetFilteredSelection<Entity>();
+            foreach (ObjectContainer map in Universe.LoadedObjectContainers.Values)//		For each map loaded
+            {
+                if(map != null){
+                    foreach(Entity en in map.Objects){
+                        if(!en.EditorVisible){//		Object is hidden. Show, record, and select all hidden objects
+                            en.EditorVisible = true;
+                            UnhiddenObjects.Add(en);
+                            Universe.Selection.AddSelection(en);
+                        }
+                    }
+                }
+            }
+            return ActionEvent.NoEvent;
+        }
+
+        public override ActionEvent Undo()
+        {
+            Universe.Selection.ClearSelection();
+            foreach (var c in PreUnhideSelection)//		Restore selection from before the un-hide opperation.
+            {
+                Universe.Selection.AddSelection(c);
+            }
+            for (int i = 0; i < UnhiddenObjects.Count(); i++)//		For all objects this command un-hid. Hide them again.
+            {
+                if (UnhiddenObjects[i] == null)//		Object has been unloaded
+                {
+                    continue;
+                }
+                UnhiddenObjects[i].EditorVisible = false;
+            }
+            return ActionEvent.NoEvent;
+        }
+    }
 
     public class CompoundAction : Action
     {
