@@ -1,8 +1,8 @@
 ## About DS Map Studio:
-DS Map Studio is a standalone map editor for all the souls games. It is intended to be the successor to DSTools. It is currently in alpha testing, so expect DS3 to crash if you open 3 maps at once. Its supports saving maps for the DS Trillogy (not BB or DeS), but the editor still lacks the stability and polish expected from a full release, so keep that in mind, and save often.
+DS Map Studio is a standalone map editor for all the souls games. It is intended to be the successor to DSTools. It is currently in alpha testing, so expect DS3 to crash if you open 3 maps at once. Its supports saving maps for the DS Trilogy (not BB or DeS), but the editor still lacks the stability and polish expected from a full release, so keep that in mind, and save often.
 
 ## About This Fork:
-* To differentiate it from the 13 other forks of Katalash's work, while also tempering expectations, I have named this DS Map Studio Re(mastered). It make some improvements over the original, but likely, not all the ones you wanted, and some major issues are not addressed.
+* To differentiate it from the 13 other forks of Katalash's work, while also tempering expectations, I have named this DS Map Studio Re(mastered). It makes some improvements over the original, but likely, not all the ones you wanted, and some major issues are not addressed.
 * I finished [TalkSickWaist](https://github.com/TalkSickWaist)'s reintegration of improvements [Philiquaz](https://github.com/Philiquaz) made to [DS Param Studio](https://github.com/Philiquaz/DSParamStudio).
 * Orbit controls have been added.
 * The Display Groups Editor now works.
@@ -30,13 +30,13 @@ Map studio operates on top of something I call mod projects. These are typically
 
 ## Special Thanks
 * [Katalash](https://github.com/katalash) - Made DS Map Studio and DSTools.
+* [Philiquaz](https://github.com/Philiquaz) - Continued development through DSParamStudio.
 * TKGP - Made Soulsformats
 * [Pav](https://github.com/JohrnaJohrna)
 * [Meowmaritus](https://github.com/meowmaritus) - Made DSAnimStudio, which DSMapStudio is loosely based on
 * [PredatorCZ](https://github.com/PredatorCZ) - Reverse engineered Spline-Compressed Animation entirely.
 * [Horkrux](https://github.com/horkrux) - Reverse engineered the header and swizzling used on non-PC platform textures.
 * [Vawser](https://github.com/vawser) - DS2/3 Documentation
-* [Philiquaz](https://github.com/Philiquaz) - Continued development through DSParamStudio, which I swear I'll integrate back in once I know how to.
 
 ## Libraries Utilized
 * Soulsformats
