@@ -1,65 +1,42 @@
-## About DS Param Studio:
-DS Param Studio is a dark souls param editor for all the souls games. It is forked from DSMapStudio, such that future integration between map and params may be possible. It is currently in a concept phase, as its future independent of DSMapStudio is uncertain.
+## About DS Map Studio:
+DS Map Studio is a standalone map editor for all the souls games. It is intended to be the successor to DSTools. It is currently in alpha testing, so expect DS3 to crash if you open 3 maps at once. Its supports saving maps for the DS Trillogy (not BB or DeS), but the editor still lacks the stability and polish expected from a full release, so keep that in mind, and save often.
+
+## About This Fork:
+* To differentiate it from the 13 other forks of Katalash's work, while also tempering expectations, I have named this DS Map Studio Re(mastered). It make some improvements over the original, but likely, not all the ones you wanted, and some major issues are not addressed.
+* I finished [TalkSickWaist](https://github.com/TalkSickWaist)'s reintegration of improvements [Philiquaz](https://github.com/Philiquaz) made to [DS Param Studio](https://github.com/Philiquaz/DSParamStudio).
+* Orbit controls have been added.
+* The Display Groups Editor now works.
+* Camera location/rotation saved and restored on project load.
 
 ## Basic usage instructions
-These are the same as for DSMapStudio.
 ### Game instructions
-* **Dark Souls Prepare to die Edition**: Game must be unpacked with UDSFM before usage (https://www.nexusmods.com/darksouls/mods/1304).
-* **Dark Souls Remastered**: Not officially supported by MapStudio, but I presume params are unchanged and work fine.
-* **Dark Souls 2 SOTFS**: Use UXM (https://www.nexusmods.com/sekiro/mods/26) to unpack the game. ParamStudio is capable of decrypting params. Vanilla Dark Souls 2 is not supported.
-* **Dark Souls 3 and Sekiro**: Use UXM to extract the game files.
-* **Demon's Souls**: Tested against the US version, but any valid full game dump of Demon's Souls will probably work out of the box. Make sure to disable the RPCS3 file cache to test changes if using the emulator.
-* **Bloodborne**: Any valid full game dump should work out of the box. Note that some dumps will have the base game (1.0) and the patch as separate, so the patch should be merged on top of the base game before use. You're on your own for installing mods to console at the moment.
+* **Dark Souls Prepare to die Edition**: Game must be unpacked with UDSFM before usage with Map Studio (https://www.nexusmods.com/darksouls/mods/1304).
+* **Dark Souls Remastered**: You can 'downgrade' to PtdE using [InfernoPlus's Remastest mod](https://www.patreon.com/posts/58341679). You can then copy the map files into your PtdE installation, work out of that directory, and then copy back to the remastered installation.
+* **Dark Souls 2 SOTFS**: Use UXM (https://www.nexusmods.com/sekiro/mods/26) to unpack the game. Params must also be decrypted before use (you can open and save them with Yapped Honey Bear edition (https://github.com/vawser/Yapped-Honey-Bear) until I implement this natively). Vanilla Dark Souls 2 is not supported.
+* **Dark Souls 3 and Sekiro**: Use [UXM](https://www.nexusmods.com/sekiro/mods/26) to extract the game files.
+* **Demon's Souls**: I test against the US version, but any valid full game dump of Demon's Souls will probably work out of the box. Make sure to disable the RPCS3 file cache to test changes if using the emulator.
+* **Bloodborne**: Any valid full game dump should work out of the box. Note that some dumps will have the base game (1.0) and the patch separate, so the patch should be merged on top of the base game before use with map studio. You're on your own for installing mods to console at the moment.
 
 ### Mod projects
-Param Studio uses MapStudio's projects, capable of saving to other directories intended for use with modengine.
-
-## FAQ
-### Q: Why use this over yapped, soulstruct, paramvessel, etc?
-The existing tools all do their core job - they display and allow editing of a bunch of numbers. Some, like yapped honeybear edition, even let you declare some fields as enums, letting you use names instead of numbers, which can be useful. Param Studio goes a step further, while fundamentally maintaining the classic param-editor format.
-Features include:
-* Multiple Views into the same params - avoids having multiple copies open when copying/reading around
-* Powerful row searching features - can perform complicated searches like "all rows where a certain field is not 0"
-* Param fields may be marked with several piece of data
-    * Enums - a set of values that a field should take, readily selectable and readable
-    * References - when a value refers to another row, that row's name is displayed and can be quickly navigated to, and a value can be set by searching for a name. (It can even alias to the nearest 100 or so).
-    * Virtual references - a value shared among multiple params, which does not specify a param row, but for which navigation to other occurances is desirable.
-    * Alternative names - DS Param Studio relies on commonly shared paramdefs, which define what a param is made up of, and give each field a name. Sometimes, these names aren't ideal, even if they're authentic.
-    * Wiki entries - small tooltips attached to a field to provide a quick reference for the user before resorting to a real wiki or asking in a discord.
-* Params may be given an alternative order for display, allowing certain misplaced fields to return to their families. Separators can be included also for cleanliness' sake.
-* Mass editing features including:
-    * A syntax for selecting fields and setting their value and performing basic arithmetic on them, using constants or values from other fields
-    * CSV import / export for more complicated edits, and for possible version control.
-* Game hooks for DS3 including
-    * Reloading params in a running game (excluding row addition/deletion)
-    * Itemgib
-
-### Q: Is this the end of DSMapStudio's param editor?
-A: No, this is more of a stopgap measure for providing features to modders. DSMapStudio is not currently being developed and I am not in a position to make official releases. Rather than release stuff with Kata's name on it and have him be pinged over random bugs he is uninvolved with, this should allow me to make tools and give them to people. Since this was original developed inside DSMapStudio, it should remain compatible and updates should be readily portable to DSMapStudio.
-
-### Q: Graphics requirements?
-A: DSMapStudio creates a whole vulkan renderer, and requests all sorts of features. I'm sat on the same renderer, even if many of those features are not used. With work it may be possible to reduce these requirements, but that would be thrown away when reintegrated with DSMapStudio.
+Map studio operates on top of something I call mod projects. These are typically stored in a separate directory from the base game, and all modifies files will be saved there instead of overwriting the base game files (there's exceptions for DS1 and DeS because we don't have a mod engine solution for them). The intended workflow is to install [mod engine](https://www.nexusmods.com/darksouls3/mods/332) for your respective game and set the modoverridedirectory in modengine.ini to your mod project directory. This way you don't have to modify base game files (and work on multiple mod projects at a time) and you can easily distribute a mod by zipping up the project directory and uploading it.
 
 ## System Requirements:
 * Windows 7/8/8.1/10 (64-bit only)
 * [Microsoft .Net Core 3.1 **Desktop** Runtime](https://dotnet.microsoft.com/download/dotnet-core/3.1)
 * [Visual C++ Redistributable x64 - INSTALL THIS IF THE PROGRAM CRASHES ON STARTUP](https://aka.ms/vs/16/release/vc_redist.x64.exe)
 * **A Vulkan Compatible Graphics Device with support for descriptor indexing**, even if you're just modding DS1: PTDE
-* Intel GPUs currently don't seem to be working properly. At the moment, you will probably need a somewhat recent (2014+) NVIDIA or AMD GPU.
-
-## Troubleshooting:
-* If the program fails to start, the primary causes are .Net Core 3.1 Desktop Runtime and Visual C++ Redistributable. Repair or reinstall these if you're having problems.
-* If the program begins to launch and then fails (eg. white screen), try running as an administrator. If that fails, make sure your computer is using the correct graphics device for the program if you have integrated graphics.
-* If you are unable to start or open a project, chances are your paramdefs or game install is wonky or misaligned. Support is not given for cracked games. For sekiro, attempt updating paramdefs.
+* Intel GPUs currently don't seem to be working properly. At the moment, you will probably need a somewhat recent (2014+) NVIDIA or AMD GPU
+* A 4GB (8GB recommended) graphics card if modding DS3/BB/Sekiro maps due to huge map sizes
 
 ## Special Thanks
-* Katalash - Made DSMapStudio
+* [Katalash](https://github.com/katalash) - Made DS Map Studio and DSTools.
 * TKGP - Made Soulsformats
 * [Pav](https://github.com/JohrnaJohrna)
 * [Meowmaritus](https://github.com/meowmaritus) - Made DSAnimStudio, which DSMapStudio is loosely based on
 * [PredatorCZ](https://github.com/PredatorCZ) - Reverse engineered Spline-Compressed Animation entirely.
 * [Horkrux](https://github.com/horkrux) - Reverse engineered the header and swizzling used on non-PC platform textures.
 * [Vawser](https://github.com/vawser) - DS2/3 Documentation
+* [Philiquaz](https://github.com/Philiquaz) - Continued development through DSParamStudio, which I swear I'll integrate back in once I know how to.
 
 ## Libraries Utilized
 * Soulsformats
