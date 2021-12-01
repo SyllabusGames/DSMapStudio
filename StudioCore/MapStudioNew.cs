@@ -116,9 +116,27 @@ namespace StudioCore
                new ResourceLayoutElementDescription("SourceSampler", ResourceKind.Sampler, ShaderStages.Fragment)));
 
             Scene.Renderer.Initialize(_gd);
-
-            ImguiRenderer = new ImGuiRenderer(_gd, _gd.SwapchainFramebuffer.OutputDescription, CFG.Current.GFX_Display_Width,
-                CFG.Current.GFX_Display_Height, ColorSpaceHandling.Legacy);
+            
+            try
+            {
+                ImguiRenderer = new ImGuiRenderer(_gd, _gd.SwapchainFramebuffer.OutputDescription, CFG.Current.GFX_Display_Width,
+                    CFG.Current.GFX_Display_Height, ColorSpaceHandling.Legacy);
+            }
+            catch
+            {
+                System.Windows.Forms.Clipboard.SetText("https://github.com/SyllabusGames/DSMapStudioRe/tree/master/Lib");
+                if(System.Windows.Forms.MessageBox.Show("cimgui.dll doesn't seem to like you and is about to crash.\n"+
+                    "You can try a different version from the Lib folder on DSMapStudioRe's Github.\n"+
+                    "  (I just copied the Lib folder's url into your clipboard.)\n"+
+                    "Just copy a cimgui.dll_old#, rename to cimgui.dll, and overwrite the copy in this program’s folder.\n" + 
+                    "If that doesn't work. You probably just have to use an older version of Map Studio. Sorry.\n\n"+
+                    "Should I close the program before it crashes?" , "Well that's not good.", System.Windows.Forms.MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
+                {
+                    Resource.ResourceManager.Shutdown();
+                    _gd.Dispose();
+                    System.Windows.Forms.Application.Exit();
+                }
+            }
             MainWindowCommandList = factory.CreateCommandList();
             GuiCommandList = factory.CreateCommandList();
 
