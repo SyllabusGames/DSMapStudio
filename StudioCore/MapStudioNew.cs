@@ -262,7 +262,8 @@ namespace StudioCore
             Resource.ResourceManager.Shutdown();
             _gd.Dispose();
             CFG.Save();
-            _projectSettings.Serialize(CFG.Current.LastProjectFile);
+            if(_projectSettings != null)
+                _projectSettings.Serialize(CFG.Current.LastProjectFile);
 
             System.Windows.Forms.Application.Exit();
         }
