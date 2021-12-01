@@ -483,6 +483,15 @@ namespace StudioCore
             ImGui.End();
 
             bool newProject = false;
+			if (InputTracker.GetControlShortcut(Key.N))
+			{
+				newProject = true;
+			}
+			if (InputTracker.GetControlShortcut(Key.S))
+			{
+				QuickSave();
+			}
+
             ImGui.PushStyleVar(ImGuiStyleVar.FrameBorderSize, 0.0f);
             if (ImGui.BeginMainMenuBar())
             {
@@ -502,7 +511,7 @@ namespace StudioCore
                         CFG.Current.EnableTexturing = !CFG.Current.EnableTexturing;
                     }
 
-                    if (ImGui.MenuItem("New Project", "CTRL+N") || InputTracker.GetControlShortcut(Key.I))
+                    if (ImGui.MenuItem("New Project", "CTRL+N"))
                     {
                         newProject = true;
                     }
@@ -550,22 +559,7 @@ namespace StudioCore
                     
                     if (ImGui.MenuItem("Save", "Ctrl-S"))
                     {
-                        if (_msbEditorFocused)
-                        {
-                            MSBEditor.Save();
-                        }
-                        if (_modelEditorFocused)
-                        {
-                            ModelEditor.Save();
-                        }
-                        if (_paramEditorFocused)
-                        {
-                            ParamEditor.Save();
-                        }
-                        if (_textEditorFocused)
-                        {
-                            TextEditor.Save();
-                        }
+						QuickSave();
                     }
                     if (ImGui.MenuItem("Save All", ""))
                     {
@@ -867,6 +861,26 @@ namespace StudioCore
             }
             _firstframe = false;
         }
+		
+		private void QuickSave()
+		{
+            if (_msbEditorFocused)
+            {
+                MSBEditor.Save();
+            }
+            if (_modelEditorFocused)
+            {
+                ModelEditor.Save();
+            }
+            if (_paramEditorFocused)
+            {
+                ParamEditor.Save();
+            }
+            if (_textEditorFocused)
+            {
+                TextEditor.Save();
+            }
+		}
 
         private void RecreateWindowFramebuffers(CommandList cl)
         {
