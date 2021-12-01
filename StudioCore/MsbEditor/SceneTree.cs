@@ -126,6 +126,7 @@ namespace StudioCore.MsbEditor
         }
 
         private Configuration _configuration;
+        private ProjectSettings _settings;//		Used by Msb editor to save default ViewMode
 
         public SceneTree(Configuration configuration, SceneTreeEventHandler handler, string id, Universe universe, Selection sel, ActionManager aman, Gui.Viewport vp, AssetLocator al)
         {
@@ -140,6 +141,15 @@ namespace StudioCore.MsbEditor
             if (_configuration == Configuration.ModelEditor)
             {
                 _viewMode = ViewMode.Hierarchy;
+            }
+        }
+        
+        public void LoadSettings(ProjectSettings Settings)
+        {
+            _settings = Settings;
+            if (_settings != null)
+            {
+                _viewMode = _settings.mapViewMode;
             }
         }
 
@@ -537,6 +547,10 @@ namespace StudioCore.MsbEditor
                     if (ImGui.Combo("##typecombo", ref mode, _viewModeStrings, _viewModeStrings.Length))
                     {
                         _viewMode = (ViewMode)mode;
+                        if(_settings != null)//		Update default view mode
+                        {
+                            _settings.mapViewMode = _viewMode;
+                        }
                     }
                 }
 

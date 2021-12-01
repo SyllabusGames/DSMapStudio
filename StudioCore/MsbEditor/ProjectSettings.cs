@@ -41,6 +41,7 @@ namespace StudioCore.MsbEditor
         public float FarClipPlane { get; set; } = 20000f;
         public float FieldOfView { get; set; } = 60f;
 
+        public SceneTree.ViewMode mapViewMode { get; set; } = SceneTree.ViewMode.Flat;
 
         /// <summary>
         /// Has different meanings depending on the game, but for supported games
