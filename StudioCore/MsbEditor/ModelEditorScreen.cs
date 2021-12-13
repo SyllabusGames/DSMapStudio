@@ -48,6 +48,8 @@ namespace StudioCore.MsbEditor
             _sceneTree = new SceneTree(SceneTree.Configuration.ModelEditor, this, "modeledittree", _universe, _selection, EditorActionManager, Viewport, AssetLocator);
             _propEditor = new PropertyEditor(EditorActionManager, Viewport._worldView);
             _assetBrowser = new AssetBrowser(this, "modelEditorBrowser", AssetLocator);
+
+            _selection.universe = _universe;
         }
 
         private bool ViewportUsingKeyboard = false;

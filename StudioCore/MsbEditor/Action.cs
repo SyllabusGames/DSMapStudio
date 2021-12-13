@@ -874,6 +874,92 @@ namespace StudioCore.MsbEditor
         }
     }
     
+    public class SetSelectionAction : Action
+    {
+        private Universe Universe;
+        private Scene.ISelectable SelectThis;
+        private List<Scene.ISelectable> PreviousSelection = new List<Scene.ISelectable>();
+        
+        public SetSelectionAction(Universe univ, Scene.ISelectable entitiy)
+        {
+            Universe = univ;
+            SelectThis = entitiy;
+            PreviousSelection = Universe.Selection.GetSelection().ToList<Scene.ISelectable>();//	Cast to list so PreviousSelection is a copy, not a reference
+        }
+
+        public override ActionEvent Execute()
+        {
+            Universe.Selection.ClearSelection();
+            Universe.Selection.AddSelection(SelectThis);
+            return ActionEvent.NoEvent;
+        }
+
+        public override ActionEvent Undo()
+        {
+            Universe.Selection.ClearSelection();
+            foreach (Entity ent in PreviousSelection)//		For each element that was selected
+            {
+                if(ent != null){
+                    Universe.Selection.AddSelection(ent);
+                }
+            }
+            return ActionEvent.NoEvent;
+        }
+    }
+
+    public class AddSelectionAction : Action
+    {
+        private Universe Universe;
+        private Scene.ISelectable SelectThis;
+        
+        public AddSelectionAction(Universe univ, Scene.ISelectable entitiy)
+        {
+            Universe = univ;
+            SelectThis = entitiy;
+        }
+
+        public override ActionEvent Execute()
+        {
+            Universe.Selection.AddSelection(SelectThis);
+            return ActionEvent.NoEvent;
+        }
+
+        public override ActionEvent Undo()
+        {
+            Universe.Selection.RemoveSelection(SelectThis);
+            return ActionEvent.NoEvent;
+        }
+    }
+
+    public class ClearSelectionAction : Action
+    {
+        private Universe Universe;
+        private HashSet<Entity> PreviousSelection = new HashSet<Entity>();
+
+        public ClearSelectionAction(Universe univ)
+        {
+            Universe = univ;
+        }
+
+        public override ActionEvent Execute()
+        {
+            PreviousSelection = Universe.Selection.GetFilteredSelection<Entity>();
+            Universe.Selection.ClearSelection();
+            return ActionEvent.NoEvent;
+        }
+
+        public override ActionEvent Undo()
+        {
+            foreach (Entity ent in PreviousSelection)//		For each element that was selected
+            {
+                if(ent != null){
+                    Universe.Selection.AddSelection(ent);
+                }
+            }
+            return ActionEvent.NoEvent;
+        }
+    }
+
     public class HideObjectsAction : Action
     {
         private Universe Universe;

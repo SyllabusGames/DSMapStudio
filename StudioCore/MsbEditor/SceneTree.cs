@@ -381,12 +381,13 @@ namespace StudioCore.MsbEditor
             {
                 if (InputTracker.GetKey(Key.ControlLeft) || InputTracker.GetKey(Key.ControlRight))
                 {
-                    _selection.AddSelection(e);
+                    var action = new MsbEditor.AddSelectionAction(_selection.universe, e);
+                    _editorActionManager.ExecuteAction(action);
                 }
-                else
+                else if(!_selection.IsSelected(e) || _selection.GetSelection().Count > 1)//		If the object clicked on is not already the only selection
                 {
-                    _selection.ClearSelection();
-                    _selection.AddSelection(e);
+                    var action = new MsbEditor.SetSelectionAction(_selection.universe, e);
+                    _editorActionManager.ExecuteAction(action);
                 }
             }
 
@@ -666,7 +667,8 @@ namespace StudioCore.MsbEditor
                                 }
                                 else
                                 {
-                                    _selection.ClearSelection();
+                                    var action = new MsbEditor.ClearSelectionAction(_selection.universe);
+                                    _editorActionManager.ExecuteAction(action);
                                     _selection.AddSelection(map.RootObject);
                                 }
                             }

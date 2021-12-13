@@ -21,6 +21,7 @@ namespace StudioCore.MsbEditor
         private AssetLocator _assetLocator;
         private Scene.RenderScene _renderScene;
         public Selection Selection { get; private set; }
+        public Map MostRecentMap;//		The last map loaded or to have one of its objects selected. New objects will be added to this map.
 
         public List<string> EnvMapTextures { get; private set; } = new List<string>();
 
@@ -411,6 +412,7 @@ namespace StudioCore.MsbEditor
         public bool LoadMap(string mapid)
         {
             var map = new Map(this, mapid);
+            MostRecentMap = map;
 
             var mappiecesToLoad = new HashSet<AssetDescription>();
             var chrsToLoad = new HashSet<AssetDescription>();

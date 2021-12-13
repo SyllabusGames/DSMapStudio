@@ -245,27 +245,37 @@ namespace StudioCore.Gui
                 if (_viewPipeline.PickingResultsReady)
                 {
                     var sel = _viewPipeline.GetSelection();
-                    if (InputTracker.GetKey(Key.ShiftLeft) || InputTracker.GetKey(Key.ShiftRight))
+                    if (InputTracker.GetKey(Key.ShiftLeft) || InputTracker.GetKey(Key.ShiftRight))//		Add to selection
                     {
                         if (sel != null)
                         {
-                            _selection.AddSelection(sel);
+                            var action = new MsbEditor.AddSelectionAction(_selection.universe, sel);
+                            _actionManager.ExecuteAction(action);
                         }
                     }
                     else
                     {
-                        _selection.ClearSelection();
-                        if (sel != null)
+                        if (sel != null)//		Set selection
                         {
-                            _selection.AddSelection(sel);
+                            if (!_selection.IsSelected(sel) || _selection.GetSelection().Count > 1)//		If the object clicked on is not already the only selection
+                            {
+                                var action = new MsbEditor.SetSelectionAction(_selection.universe, sel);
+                                _actionManager.ExecuteAction(action);
+                            }
+                        }
+                        else if(_selection.GetSelection().Count > 0)//		Clicked on nothing. Clear selection
+                        {
+                            var clearAction = new MsbEditor.ClearSelectionAction(_selection.universe);
+                            _actionManager.ExecuteAction(clearAction);
                         }
                     }
                 }
             }
 
-            if (InputTracker.GetKey(Key.Escape) && MouseInViewport())
+            if (InputTracker.GetKey(Key.Escape) && MouseInViewport() && _selection.GetSelection().Count > 0)
             {
-                _selection.ClearSelection();
+                var clearAction = new MsbEditor.ClearSelectionAction(_selection.universe);
+                _actionManager.ExecuteAction(clearAction);
             }
 
             //Gizmos.DebugGui();

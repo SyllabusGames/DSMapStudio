@@ -376,10 +376,10 @@ namespace StudioCore
                     else if (currentMouseClickM)//	Orbit camera
                     {
                         if (shiftWasHeldBeforeClickM){//	Pan
-                            Vector3 cameraSpacePanDirection = new Vector3(camH, camV, 0);
+                        //    Vector3 cameraSpacePanDirection = new Vector3(camH, camV, 0);
                         //	Vector3 cameraSpacePanDirection = Vector3.Transform(new Vector3(camH, camV, 0), CameraTransform.Rotation);
                         //		CameraMoveSpeed is not used so Msb and Model Editors work the same and movement speed is based on zoom. I hard coded 10 instead.
-                            MoveCamera(cameraSpacePanDirection.X, cameraSpacePanDirection.Y, cameraSpacePanDirection.Z, OrbitCamDistance * dt * 10);
+                            MoveCamera(camH, camV, 0, OrbitCamDistance * dt * 10);
                             UpdateOrbitCameraCenter();
                         }
                         else//		Orbit

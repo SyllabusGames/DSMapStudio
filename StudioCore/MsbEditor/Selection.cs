@@ -9,6 +9,7 @@ namespace StudioCore.MsbEditor
     public class Selection
     {
         private HashSet<Scene.ISelectable> _selected = new HashSet<Scene.ISelectable>();
+        public Universe universe;
 
         public bool IsSelection()
         {
@@ -109,12 +110,26 @@ namespace StudioCore.MsbEditor
             _selected.Clear();
         }
 
+        public void RemoveSelection(Scene.ISelectable selected)
+        {
+            if (selected != null && _selected.Contains(selected))
+            {
+                selected.OnDeselected();
+                _selected.Remove(selected);
+            }
+        }
+
         public void AddSelection(Scene.ISelectable selected)
         {
             if (selected != null)
             {
                 selected.OnSelected();
                 _selected.Add(selected);
+                if (selected is MapEntity ent)
+                {
+                    if(ent.ContainingMap != null)
+                        universe.MostRecentMap = ent.ContainingMap;//		Update the most recent map used
+                }
             }
         }
 

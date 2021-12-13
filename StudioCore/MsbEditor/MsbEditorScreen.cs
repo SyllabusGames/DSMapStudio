@@ -86,6 +86,8 @@ namespace StudioCore.MsbEditor
             EditorActionManager.AddEventHandler(SceneTree);
 
             RenderScene.DrawFilter = CFG.Current.LastSceneFilter;
+
+            _selection.universe = Universe;
         }
 
         private bool ViewportUsingKeyboard = false;
@@ -165,7 +167,7 @@ namespace StudioCore.MsbEditor
         {
             var newent = typ.GetConstructor(Type.EmptyTypes).Invoke(new object[0]);
 
-            var map = Universe.LoadedObjectContainers.Values.First((x) => x != null);
+            var map = Universe.MostRecentMap;
             if(map == null)
                 return;
 
