@@ -79,7 +79,7 @@ namespace StudioCore.MsbEditor
 
             SceneTree = new SceneTree(SceneTree.Configuration.MapEditor, this, "mapedittree", Universe, _selection, EditorActionManager, Viewport, AssetLocator);
             PropEditor = new PropertyEditor(EditorActionManager, Viewport._worldView);
-            DispGroupEditor = new DisplayGroupsEditor(RenderScene, _selection);
+            DispGroupEditor = new DisplayGroupsEditor(EditorActionManager, RenderScene, _selection);
             PropSearch = new SearchProperties(Universe);
             NavMeshEditor = new NavmeshEditor(locator, RenderScene, _selection);
 
@@ -614,6 +614,7 @@ namespace StudioCore.MsbEditor
             Universe.PopulateMapList();
             Viewport._worldView.LoadSettings(newSettings);
             SceneTree.LoadSettings(newSettings);
+			DispGroupEditor.Clear();
 
             if (AssetLocator.Type != GameType.Undefined)
             {

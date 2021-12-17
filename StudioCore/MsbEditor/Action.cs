@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Reflection;
 using SoulsFormats;
-using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 
 namespace StudioCore.MsbEditor
@@ -873,6 +871,42 @@ namespace StudioCore.MsbEditor
             return ActionEvent.NoEvent;
         }
     }
+
+    public class ChangeDisplayGroups : Action
+    {
+        private List<Entity> groupSelection;
+        private uint[][] newDrawgroups;
+        private uint[][] originalDrawgroups;
+        private uint[][] newDispgroups;
+        private uint[][] originalDispgroups;
+        
+        public ChangeDisplayGroups(List<Entity> groupSelection, uint[][] newDrawgroups, uint[][] originalDrawgroups, uint[][] newDispgroups, uint[][] originalDispgroups)
+        {
+            this.groupSelection = groupSelection;
+            this.newDrawgroups = newDrawgroups;
+            this.originalDrawgroups = originalDrawgroups;
+            this.newDispgroups = newDispgroups;
+            this.originalDispgroups = originalDispgroups;
+        }
+
+        public override ActionEvent Execute()
+        {
+            for (int p = 0 ; p < groupSelection.Count ; p++){//		Record all object's groups in order
+                newDrawgroups[p].CopyTo(groupSelection[p].Drawgroups , 0);
+                newDispgroups[p].CopyTo(groupSelection[p].Dispgroups , 0);
+            }
+            return ActionEvent.NoEvent;
+        }
+
+        public override ActionEvent Undo()
+        {
+            for (int p = 0 ; p < groupSelection.Count ; p++){//		Record all object's groups in order
+                originalDrawgroups[p].CopyTo(groupSelection[p].Drawgroups , 0);
+                originalDispgroups[p].CopyTo(groupSelection[p].Dispgroups , 0);
+            }
+            return ActionEvent.NoEvent;
+        }
+    }
     
     public class SetSelectionAction : Action
     {
@@ -920,13 +954,19 @@ namespace StudioCore.MsbEditor
 
         public override ActionEvent Execute()
         {
-            Universe.Selection.AddSelection(SelectThis);
+            if(Universe.Selection.IsSelected(SelectThis))//		Object was already selected, deselect
+                Universe.Selection.RemoveSelection(SelectThis);
+            else//		Normal add to seleciton
+                Universe.Selection.AddSelection(SelectThis);
             return ActionEvent.NoEvent;
         }
 
         public override ActionEvent Undo()
         {
-            Universe.Selection.RemoveSelection(SelectThis);
+            if(Universe.Selection.IsSelected(SelectThis))//		Object was already selected, deselect
+                Universe.Selection.RemoveSelection(SelectThis);
+            else//		Normal add to seleciton
+                Universe.Selection.AddSelection(SelectThis);
             return ActionEvent.NoEvent;
         }
     }

@@ -1,16 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Numerics;
 using ImGuiNET;
-using System.IO;
 
 namespace StudioCore.MsbEditor
 {
     public class DisplayGroupsEditor
     {
+        private ActionManager _editorActionManager;
         private Scene.RenderScene _scene;
         private Selection _selection;
+        
+        bool groupsHaveChanged = false;
+        uint[][] preActionDrawgroups;
+        uint[][] preActionDispgroups;
 
         bool mouseHeldToSetLayer;
         bool setChecked;
@@ -18,62 +21,71 @@ namespace StudioCore.MsbEditor
         Vector2 cursorWindowPos;
         Vector2 firstCheckboxWindowPos = new Vector2(157 , 62);
 
-        //		I arbitrarily chose for there to be 4 slots.
+        //		I arbitrarily chose for there to be 4 slots. Any number should work.
         uint[][] copiedDrawGroups = new uint[4][]{null , null , null , null};
         uint[][] copiedDispGroups = new uint[4][]{null , null , null , null};
         string[] copiedDrawDisplay = new string[4];
         string[] copiedDispDisplay = new string[4];
         string[] groupNames = new string[4]{"A", "B", "C", "D"};//		Buttons have to have unique names in imGui.
 
-        public DisplayGroupsEditor(Scene.RenderScene scene, Selection sel)
+        public DisplayGroupsEditor(ActionManager editorActionManager, Scene.RenderScene scene, Selection sel)
         {
+            _editorActionManager = editorActionManager;
             _scene = scene;
             _selection = sel;
         }
 
-        //		Group editing object's Group data will only ever change the bit you clicked
-        //		Only layers enabled on every object selected will be colored
+        public void Clear()
+        {
+            copiedDrawGroups = new uint[4][]{null , null , null , null};
+            copiedDispGroups = new uint[4][]{null , null , null , null};
+            copiedDrawDisplay = new string[4];
+            copiedDispDisplay = new string[4];
+            groupsHaveChanged = false;
+        }
 
         public void OnGui(GameType game)//		This runs every frame and the ImGui.Button is a promt to check if the button has been pressed
         {
+            var layerCount = (game == GameType.DemonsSouls || game == GameType.DarkSoulsPTDE || game == GameType.DarkSoulsRemastered || game == GameType.DarkSoulsIISOTFS) ? 4 : 8;
+
             uint[] sdrawgroups = null;
             uint[] sdispgroups = null;
-            var sel = _selection.GetSingleFilteredSelection<Entity>();
-            HashSet<Entity> groupSelection = null;
-            var count = (game == GameType.DemonsSouls || game == GameType.DarkSoulsPTDE || game == GameType.DarkSoulsRemastered || game == GameType.DarkSoulsIISOTFS) ? 4 : 8;
-            if (sel != null)
-            {
-                if (sel.UseDrawGroups)
-                {
-                    sdrawgroups = sel.Drawgroups;
-                }
-                sdispgroups = sel.Dispgroups;
+            List<Entity> groupSelection = new List<Entity>();
+            HashSet<Entity> uncheckedGroupSelection = _selection.GetFilteredSelection<Entity>();
+
+            foreach (Entity ent in uncheckedGroupSelection){
+                if(ent.UseDrawGroups)
+                    groupSelection.Add(ent);
             }
-            else//		There was not 1 object selected
+
+            if (groupSelection.Count != 0)
             {
-                groupSelection =_selection.GetFilteredSelection<Entity>();
-                if (groupSelection.Count > 1)//		Multiple objects selected
+                sdrawgroups = new uint[layerCount];
+                sdispgroups = new uint[layerCount];
+                for (int i = 0; i < layerCount; i++)//		Set every group to fully on
                 {
-                    sdrawgroups = new uint[count];
-                    sdispgroups = new uint[count];
-                    for (int i = 0; i < count; i++)//		Set every group to fully on
+                    sdrawgroups[i] = uint.MaxValue;
+                    sdispgroups[i] = uint.MaxValue;
+                }
+                foreach (Entity ent in groupSelection)//		Bitwise AND the amassed layer data with each entity to remove every layer not used by at least one selected entity
+                {
+                    for (int i = 0; i < layerCount; i++)//		For every group
                     {
-                        sdrawgroups[i] = uint.MaxValue;
-                        sdispgroups[i] = uint.MaxValue;
+                        sdrawgroups[i] = sdrawgroups[i] & ent.Drawgroups[i];
+                        sdispgroups[i] = sdispgroups[i] & ent.Dispgroups[i];
                     }
-                    foreach (Entity ent in groupSelection)//		Bitwise AND the amassed layer data with each entity to remove every layer not used by at least one selected entity
-                    {
-                        for (int i = 0; i < count; i++)//		For every group
-                        {
-                            if(ent.UseDrawGroups){
-                                if (ent.UseDrawGroups)
-                                {
-                                    sdrawgroups[i] = sdrawgroups[i] & ent.Drawgroups[i];
-                                }
-                                sdispgroups[i] = sdispgroups[i] & ent.Dispgroups[i];
-                            }
-                        }
-                    }
+                }
+            }
+
+            if (InputTracker.GetMouseButtonDown(Veldrid.MouseButton.Left)){//		New action started. Record initial layer data for Undo.
+                groupsHaveChanged = false;
+                preActionDrawgroups = new uint[groupSelection.Count][];
+                preActionDispgroups = new uint[groupSelection.Count][];
+                for (int p = 0 ; p < groupSelection.Count ; p++){//		Record all object's groups in order
+                    preActionDrawgroups[p] = new uint[layerCount];
+                    preActionDispgroups[p] = new uint[layerCount];
+                    groupSelection[p].Drawgroups.CopyTo(preActionDrawgroups[p] , 0);
+                    groupSelection[p].Dispgroups.CopyTo(preActionDispgroups[p] , 0);
                 }
             }
 
@@ -81,10 +93,10 @@ namespace StudioCore.MsbEditor
             if (ImGui.Begin("Display Groups"))
             {
                 var dg = _scene.DisplayGroup;
-                if (dg.AlwaysVisible || dg.Drawgroups.Length != count)
+                if (dg.AlwaysVisible || dg.Drawgroups.Length != layerCount)
                 {
-                    dg.Drawgroups = new uint[count];
-                    for (int i = 0; i < count; i++)
+                    dg.Drawgroups = new uint[layerCount];
+                    for (int i = 0; i < layerCount; i++)
                     {
                         dg.Drawgroups[i] = 0xFFFFFFFF;
                     }
@@ -94,7 +106,7 @@ namespace StudioCore.MsbEditor
                 ImGui.PushStyleColor(ImGuiCol.Border, new Vector4(0.45f, 0.45f, 0.05f, 1.0f));
                 if (ImGui.Button("Show All"))
                 {
-                    for (int i = 0; i < count; i++)
+                    for (int i = 0; i < layerCount; i++)
                     {
                         dg.Drawgroups[i] = 0xFFFFFFFF;
                     }
@@ -102,7 +114,7 @@ namespace StudioCore.MsbEditor
                 ImGui.SameLine();
                 if (ImGui.Button("Hide All"))
                 {
-                    for (int i = 0; i < count; i++)
+                    for (int i = 0; i < layerCount; i++)
                     {
                         dg.Drawgroups[i] = 0;
                     }
@@ -111,7 +123,7 @@ namespace StudioCore.MsbEditor
                 if (sdispgroups != null && ImGui.Button("Set from Selected"))
                 {
                     bool noActiveGroups = true;
-                    for (int i = 0; i < count; i++)
+                    for (int i = 0; i < layerCount; i++)
                     {
                         dg.Drawgroups[i] = sdispgroups[i];
                         if(sdispgroups[i] > 0)//		At least one layer from this group is on
@@ -120,7 +132,7 @@ namespace StudioCore.MsbEditor
                     //		No Disp groups were enabled on the selected object. Hiding everything was likely not the intention. Set from Draw Groups.
                     if(noActiveGroups && sdrawgroups != null)
                     {
-                        for (int i = 0; i < count; i++)
+                        for (int i = 0; i < layerCount; i++)
                         {
                             dg.Drawgroups[i] = sdrawgroups[i];
                         }
@@ -146,6 +158,25 @@ namespace StudioCore.MsbEditor
                 }
                 cursorWindowPos = InputTracker.MousePosition - ImGui.GetWindowPos();
 
+                
+                //		Mouse released, stop dragging layer settings
+                if(mouseHeldToSetLayer && !InputTracker.GetMouseButton(Veldrid.MouseButton.Left))
+                {
+                    mouseHeldToSetLayer = false;
+                    if(groupsHaveChanged){//		Record the change as an action on the Undo stack. 
+                        uint[][] newDrawgroups = new uint[groupSelection.Count][];
+                        uint[][] newDispgroups = new uint[groupSelection.Count][];
+                        for (int p = 0 ; p < groupSelection.Count ; p++){//		Record all object's groups in order
+                            newDrawgroups[p] = new uint[layerCount];
+                            newDispgroups[p] = new uint[layerCount];
+                            groupSelection[p].Drawgroups.CopyTo(newDrawgroups[p] , 0);
+                            groupSelection[p].Dispgroups.CopyTo(newDispgroups[p] , 0);
+                        }
+
+                        var action = new ChangeDisplayGroups(groupSelection, newDrawgroups , preActionDrawgroups, newDispgroups, preActionDispgroups);
+                        _editorActionManager.ExecuteAction(action);
+                    }
+                }
 
                 for (int g = 0; g < dg.Drawgroups.Length; g++)//		For every group
                 {
@@ -165,7 +196,6 @@ namespace StudioCore.MsbEditor
 
                     for (int i = 0; i < 32; i++)//		For every column
                     {
-                        
                         bool check = ((dg.Drawgroups[g] >> i) & 0x1) > 0;//		Group is enabled
                         Vector2 cursorRelativeToCheckbox = cursorWindowPos - (firstCheckboxWindowPos + new Vector2(i*28 , g*25));
 
@@ -184,11 +214,6 @@ namespace StudioCore.MsbEditor
                             cursorWindowPos.Y < buttonStartPos.Y+6){}//		Mouse is over the checkbox
                     */
 
-                        //		Mouse released, stop dragging layer settings
-                        if(mouseHeldToSetLayer && !InputTracker.GetMouseButton(Veldrid.MouseButton.Left))
-                        {
-                            mouseHeldToSetLayer = false;
-                        }
 
 
                         ImGui.SameLine();
@@ -211,31 +236,30 @@ namespace StudioCore.MsbEditor
                             ImGui.PushStyleColor(ImGuiCol.CheckMark, new Vector4(0.2f, 1.0f, 0.2f, check?1.0f:0.2f));
                         }
 
-                    //	if(ImGui.Checkbox($@"##dispgroup{g}{i}", ref check))//		Don't use the check box as a function to check for input. It only works on mouse up.
                         ImGui.Checkbox($@"##dispgroup{g}{i}", ref check);//		Don't use the check box as a function to check for input. It only works on mouse up.
-                        if(cursorOverCheckbox)
+                        if (cursorOverCheckbox)
                         {	
-                            if(InputTracker.GetMouseButtonDown(Veldrid.MouseButton.Left))
+                            if (InputTracker.GetMouseButtonDown(Veldrid.MouseButton.Left))
                             {
                                 bool toggleCheckMark = true;
-                                if(sdrawgroups != null && InputTracker.GetKey(Veldrid.Key.LShift) || InputTracker.GetKey(Veldrid.Key.RShift))//		Shift held. Toggle selected object's Draw Group.
+                                if (sdrawgroups != null && InputTracker.GetKey(Veldrid.Key.LShift) || InputTracker.GetKey(Veldrid.Key.RShift))//		Shift held. Toggle selected object's Draw Group.
                                 {
                                     uint changeThisBit = (uint)Math.Round(MathF.Pow(2 , i));
                                     setChecked = (changeThisBit & sdrawgroups[g]) <= 0;
-                                    toggleCheckMark = SetDrawLayer(g, changeThisBit, setChecked, sel, groupSelection);
+                                    toggleCheckMark = SetDrawLayer(g, changeThisBit, setChecked, groupSelection);
                                     mouseHeldToSetLayer = true;
 
                                 }
-                                if(sdispgroups != null && InputTracker.GetKey(Veldrid.Key.LControl) || InputTracker.GetKey(Veldrid.Key.RControl))//		Control held. Toggle selected object's Disp Group.
+                                if (sdispgroups != null && InputTracker.GetKey(Veldrid.Key.LControl) || InputTracker.GetKey(Veldrid.Key.RControl))//		Control held. Toggle selected object's Disp Group.
                                 {
                                     uint changeThisBit = (uint)Math.Round(MathF.Pow(2 , i));
                                     setChecked = (changeThisBit & sdispgroups[g]) <= 0;
-                                    toggleCheckMark = SetDispLayer(g, changeThisBit, setChecked, sel, groupSelection);
+                                    toggleCheckMark = SetDispLayer(g, changeThisBit, setChecked, groupSelection);
                                     mouseHeldToSetLayer = true;
                                 
                                 }
                                 
-                                if(toggleCheckMark)//		Normal layer toggling
+                                if (toggleCheckMark)//		Normal layer toggling
                                 {
                                     check = !check;
                                     mouseHeldToSetLayer = true;
@@ -250,24 +274,24 @@ namespace StudioCore.MsbEditor
                                     }
                                 }
                             }
-                            else if(mouseHeldToSetLayer && InputTracker.GetMouseButton(Veldrid.MouseButton.Left))//		Dragging the mouse across checkboxes
+                            else if (mouseHeldToSetLayer && InputTracker.GetMouseButton(Veldrid.MouseButton.Left))//		Dragging the mouse across checkboxes
                             {
                                 bool toggleCheckMark = true;
                                 if(sdrawgroups != null && InputTracker.GetKey(Veldrid.Key.LShift) || InputTracker.GetKey(Veldrid.Key.RShift))//		Shift held. Toggle selected object's Draw Group.
                                 {
                                     toggleCheckMark = false;
                                     uint changeThisBit = (uint)Math.Round(MathF.Pow(2 , i));
-                                    SetDrawLayer(g, changeThisBit, setChecked, sel, groupSelection);
+                                    SetDrawLayer(g, changeThisBit, setChecked, groupSelection);
                                 }
 
                                 if(sdispgroups != null && InputTracker.GetKey(Veldrid.Key.LControl) || InputTracker.GetKey(Veldrid.Key.RControl))
                                 {
                                     toggleCheckMark = false;
                                     uint changeThisBit = (uint)Math.Round(MathF.Pow(2 , i));
-                                    SetDispLayer(g, changeThisBit, setChecked, sel, groupSelection);
+                                    SetDispLayer(g, changeThisBit, setChecked, groupSelection);
                                 }
 
-                                if(toggleCheckMark)
+                                if (toggleCheckMark)
                                 {
                                     if (setChecked)//		Check has changed. Invert the effected bit.
                                     {
@@ -292,47 +316,50 @@ namespace StudioCore.MsbEditor
             if(sdispgroups != null)//		Something is selected
             {
                 ImGui.PushStyleColor(ImGuiCol.Border, new Vector4(0.45f, 0.45f, 0.05f, 1.0f));
-                for (int i = 0; i < 4; i++)//		4 Copy Paste Buttons
+                for (int saveSlot = 0; saveSlot < 4; saveSlot++)//		4 Copy Paste Buttons
                 {
-                    if (ImGui.Button("Copy object(s) " + groupNames[i]))//	Save groups
+                    if (ImGui.Button("Copy object(s) " + groupNames[saveSlot]))//	Save groups
                     {
-                        copiedDrawGroups[i] = new uint[sdrawgroups.Length];
-                        copiedDispGroups[i] = new uint[sdispgroups.Length];
-                        Array.Copy(sdrawgroups , copiedDrawGroups[i] , sdrawgroups.Length);
-                        Array.Copy(sdispgroups , copiedDispGroups[i] , sdispgroups.Length);
-                        copiedDrawDisplay[i] = "Draw:";
-                        copiedDispDisplay[i] = "Disp:";
+                        copiedDrawGroups[saveSlot] = new uint[sdrawgroups.Length];
+                        copiedDispGroups[saveSlot] = new uint[sdispgroups.Length];
+                        Array.Copy(sdrawgroups , copiedDrawGroups[saveSlot] , sdrawgroups.Length);
+                        Array.Copy(sdispgroups , copiedDispGroups[saveSlot] , sdispgroups.Length);
+                        copiedDrawDisplay[saveSlot] = "Draw:";
+                        copiedDispDisplay[saveSlot] = "Disp:";
                         for (int g = 0; g < sdrawgroups.Length; g++)//		Record the hex display of the saved layers
                         {
-                            copiedDrawDisplay[i] += copiedDrawGroups[i][g].ToString("x8") + ",";
-                            copiedDispDisplay[i] += copiedDispGroups[i][g].ToString("x8") + ",";
+                            copiedDrawDisplay[saveSlot] += copiedDrawGroups[saveSlot][g].ToString("x8") + ",";
+                            copiedDispDisplay[saveSlot] += copiedDispGroups[saveSlot][g].ToString("x8") + ",";
                         }
                     }
-                    if (copiedDrawGroups[i] != null)
+                    if (copiedDrawGroups[saveSlot] != null)
                     {
                         ImGui.SameLine();
-                        ImGui.Text(copiedDrawDisplay[i]);
+                        ImGui.Text(copiedDrawDisplay[saveSlot]);
                         ImGui.SameLine();
-                        if (ImGui.Button("Paste " + groupNames[i] + " to object(s)"))//		Groups have been copied
+                        if (ImGui.Button("Paste " + groupNames[saveSlot] + " to object(s)"))//		Groups have been copied
                         {
-                            if (sel != null && sel.UseDrawGroups)
-                            {
-                                Array.Copy(copiedDrawGroups[i] , sel.Drawgroups , sdrawgroups.Length);
-                                Array.Copy(copiedDispGroups[i] , sel.Dispgroups , sdispgroups.Length);
+                            preActionDrawgroups = new uint[groupSelection.Count][];
+                            preActionDispgroups = new uint[groupSelection.Count][];
+                            uint[][] newDrawgroups = new uint[groupSelection.Count][];
+                            uint[][] newDispgroups = new uint[groupSelection.Count][];
+                            for (int i = 0 ; i < groupSelection.Count ; i++){
+                                preActionDrawgroups[i] = new uint[layerCount];
+                                preActionDispgroups[i] = new uint[layerCount];
+                                newDrawgroups[i] = new uint[layerCount];
+                                newDispgroups[i] = new uint[layerCount];
+                                groupSelection[i].Drawgroups.CopyTo(preActionDrawgroups[i] , 0);
+                                groupSelection[i].Dispgroups.CopyTo(preActionDispgroups[i] , 0);
+                                copiedDrawGroups[saveSlot].CopyTo(newDrawgroups[i] , 0);
+                                copiedDispGroups[saveSlot].CopyTo(newDispgroups[i] , 0);
                             }
-                            else if(groupSelection != null)//		Copy to multiple objects
-                            {
-                                foreach (Entity ent in groupSelection)
-                                {
-                                    if(ent.UseDrawGroups){
-                                        Array.Copy(copiedDrawGroups[i] , ent.Drawgroups , sdrawgroups.Length);
-                                        Array.Copy(copiedDispGroups[i] , ent.Dispgroups , sdispgroups.Length);
-                                    }
-                                }
-                            }
+
+                            var action = new ChangeDisplayGroups(groupSelection, newDrawgroups , preActionDrawgroups, newDispgroups, preActionDispgroups);
+                            _editorActionManager.ExecuteAction(action);
+
                         }
                         ImGui.SameLine();
-                        ImGui.Text(copiedDispDisplay[i]);
+                        ImGui.Text(copiedDispDisplay[saveSlot]);
                     }
                 }
                 ImGui.PopStyleColor();
@@ -340,18 +367,11 @@ namespace StudioCore.MsbEditor
             ImGui.End();
         }
 
-        bool SetDrawLayer(int group, uint changeThisBit, bool setBitHigh, Entity sel, HashSet<Entity> groupSelection)
+        bool SetDrawLayer(int group, uint changeThisBit, bool setBitHigh, List<Entity> groupSelection)
         {
-            if(sel != null && sel.UseDrawGroups)//		One object selected
+            if (groupSelection.Count > 0)
             {
-                if (setBitHigh)//									Set bit high reguardless of its current state by ORing it with changeThisBit
-                    sel.Drawgroups[group] = sel.Drawgroups[group] | changeThisBit;
-                else//		Set bit low reguardless of its current state by ANDing it with the inverse of changeThisBit
-                    sel.Drawgroups[group] = sel.Drawgroups[group] & ~changeThisBit;
-                return false;
-            }
-            else if(groupSelection != null)//		Multiple objects selected. Set them all to setBitHigh
-            {
+                groupsHaveChanged = true;
                 foreach (Entity ent in groupSelection)
                 {
                     if (ent.UseDrawGroups){
@@ -367,18 +387,11 @@ namespace StudioCore.MsbEditor
         }
 
 
-        bool SetDispLayer(int group, uint changeThisBit, bool setBitHigh, Entity sel, HashSet<Entity> groupSelection)
+        bool SetDispLayer(int group, uint changeThisBit, bool setBitHigh, List<Entity> groupSelection)
         {
-            if(sel != null && sel.UseDrawGroups)//		One object selected
+            if (groupSelection.Count > 0)
             {
-                if (setBitHigh)//									Set bit high reguardless of its current state by ORing it with changeThisBit
-                    sel.Dispgroups[group] = sel.Dispgroups[group] | changeThisBit;
-                else//		Set bit low reguardless of its current state by ANDing it with the inverse of changeThisBit
-                    sel.Dispgroups[group] = sel.Dispgroups[group] & ~changeThisBit;
-                return false;
-            }
-            else if(groupSelection != null)//		Multiple objects selected. Set them all to setBitHigh
-            {
+                groupsHaveChanged = true;
                 foreach (Entity ent in groupSelection)
                 {
                     if (ent.UseDrawGroups && ent.UseDrawGroups){
