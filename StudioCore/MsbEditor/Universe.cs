@@ -459,6 +459,20 @@ namespace StudioCore.MsbEditor
                 amapid = "m29_00_00_00";
             }
 
+            if(_assetLocator.Type == GameType.DarkSoulsIISOTFS && amapid == "m10_14_00_00" && (_renderScene.DrawFilter & Scene.RenderFilter.MapPiece) > 0){
+                System.Windows.Forms.MessageBox.Show(
+                    "Brightstone Cove Tseldora usually crashes if map pieces are loaded.\nI have unloaded them for you. Do not re-enable them until Tseldora is unloaded." , 
+                    "Unloading Map Pieces");
+                _renderScene.DrawFilter &= ~Scene.RenderFilter.MapPiece;
+            }
+
+            if(_assetLocator.Type == GameType.DarkSoulsIII && amapid == "m34_01_00_00" && (_renderScene.DrawFilter & Scene.RenderFilter.MapPiece) > 0){
+                System.Windows.Forms.MessageBox.Show(
+                    "Grand Archives usually crashes if map pieces are loaded.\nI have unloaded them for you. Do not re-enable them until the Archives is unloaded." , 
+                    "Unloading Map Pieces");
+                _renderScene.DrawFilter &= ~Scene.RenderFilter.MapPiece;
+            }
+
             foreach (var model in msb.Models.GetEntries())
             {
                 AssetDescription asset;
