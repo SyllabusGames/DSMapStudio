@@ -60,37 +60,78 @@ namespace StudioCore.MsbEditor
         private Entity _pendingClick = null;
 
         private bool _setNextFocus = false;
-
+        
         public Dictionary<string, string> DS1NickNames = new Dictionary<string, string>(){
-            {"m10_00_00_00", "Depths"},
-            {"m10_01_00_00", "Undead Burg"},
-            {"m10_02_00_00", "Firelink Shrine"},
+            {"m10_00_00_00", "The Depths"},
+            {"m10_01_00_00", "Undead Burg/Parish"},
+            {"m10_02_00_00", "Firelink"},
             {"m11_00_00_00", "Painted World"},
             {"m12_00_00_00", "Darkroot Garden"},
-            {"m12_01_00_00", "Oolacile/Abyss"},
+            {"m12_00_00_01", "Darkroot Garden (DLC)"},
+            {"m12_01_00_00", "Oolacile, Abyss"},
             {"m13_00_00_00", "Catacombs"},
             {"m13_01_00_00", "Tomb of the Giants"},
-            {"m13_02_00_00", "Great Hollow/Ash Lake"},
-            {"m14_00_00_00", "Blighttown/Quelaag's"},
-            {"m14_01_00_00", "Demon Ruins/Lost Izalith"},
+            {"m13_02_00_00", "Great Hollow, Ash Lake"},
+            {"m14_00_00_00", "Blighttown, Quelaag's Domain"},
+            {"m14_01_00_00", "Demon Ruins, Lost Izalith"},
             {"m15_00_00_00", "Sen's Fortress"},
             {"m15_01_00_00", "Anor Londo"},
-            {"m16_00_00_00", "New Londo/Valley"},
+            {"m16_00_00_00", "New Londo, Valley of Drakes"},
             {"m17_00_00_00", "Duke's Archives"},
             {"m18_00_00_00", "Kiln of the First Flame"},
-            {"m18_01_00_00", "Undead Asylum"},
+            {"m18_01_00_00", "Northern Undead Asylum"},
+        };
+        public Dictionary<string, string> DS2NickNames = new Dictionary<string, string>(){
+            {"m10_02_00_00", "Things Betwixt"},
+            {"m10_04_00_00", "Majula"},
+            {"m10_10_00_00", "Forest of Fallen Giants"},
+            {"m10_11_00_00", "(Unused) Shrine of Amana"},
+            {"m10_14_00_00", "Brightstone Cove Tseldora"},
+            {"m10_15_00_00", "Aldia's Keep"},
+            {"m10_16_00_00", "The Lost Bastille"},
+            {"m10_17_00_00", "Harvest Valley/Earthen Peak"},
+            {"m10_18_00_00", "No-Man's Wharf"},
+            {"m10_19_00_00", "Iron Keep, Belfry Sol"},
+            {"m10_21_00_00", "(Unused) Drangleic Castle"},
+            {"m10_23_00_00", "Huntsman's Copse"},
+            {"m10_24_00_00", "(Unused) Undead Crypt"},
+            {"m10_25_00_00", "The Gutter, Black Gulch"},
+            {"m10_27_00_00", "Dragon Aerie, Dragon Shrine"},
+            {"m10_28_00_00", "(Unused) Firelink Throne"},
+            {"m10_29_00_00", "Majula -> Shaded Woods Transition"},
+            {"m10_30_00_00", "Heide's -> Wharf Transition"},
+            {"m10_31_00_00", "Heide's Tower of Flame"},
+            {"m10_32_00_00", "Shaded Woods"},
+            {"m10_33_00_00", "Doors of Pharros"},
+            {"m10_34_00_00", "Grave of Saints"},
+            {"m20_03_00_00", "(Unused) Dark Chasm of Old"},
+            {"m20_10_00_00", "Giant Memories"},
+            {"m20_11_00_00", "Shrine of Amana"},
+            {"m20_21_00_00", "Drangleic Castle"},
+            {"m20_24_00_00", "Undead Crypt"},
+            {"m20_26_00_00", "Dragon Memories"},
+            {"m20_27_00_00", "(Unused) Dragon Aerie & Dragon Shrine"},
+            {"m40_03_00_00", "Dark Chasm of Old"},
+            {"m40_50_00_00", "Abyss 1"},
+            {"m40_51_00_00", "Abyss 2"},
+            {"m40_52_00_00", "Abyss 3"},
+            {"m50_35_00_00", "Sunken King DLC"},
+            {"m50_36_00_00", "Old Iron King DLC"},
+            {"m50_37_00_00", "Ivory King DLC"},
+            {"m50_38_00_00", "Memory of Vendrick"},
         };
         public Dictionary<string, string> DS3NickNames = new Dictionary<string, string>(){
             {"m30_00_00_00", "High Wall of Lothric"},
             {"m30_01_00_00", "Lothric Castle"},
             {"m31_00_00_00", "Undead Settlement"},
             {"m32_00_00_00", "Archdragon Peak"},
-            {"m33_00_00_00", "Road of Sacrifices/Faron"},
-            {"m34_01_00_00", "Lothric Castle"},
+            {"m33_00_00_00", "Road of Sacrifices, Farron Keep"},
+            {"m34_01_00_00", "Grand Archives"},
             {"m35_00_00_00", "Cathedral of the Deep"},
-            {"m37_00_00_00", "Irithyll of the Boreal Valley"},
-            {"m38_00_00_00", "Smouldering  Lake"},
-            {"m39_00_00_00", "Irithyll Dungeon/Profaned Capital"},
+            {"m36_00_00_00", "God Grave (Cut)"},
+            {"m37_00_00_00", "Irithyll of the Boreal Valley, Anor Londo"},
+            {"m38_00_00_00", "Catacombs of Carthus, Smouldering Lake"},
+            {"m39_00_00_00", "Irithyll Dungeon, Profaned Capital"},
             {"m40_00_00_00", "Firelink Shrine"},
             {"m41_00_00_00", "Kiln of the First Flame"},
             {"m45_00_00_00", "Painted World of Ariandel"},
@@ -101,6 +142,46 @@ namespace StudioCore.MsbEditor
             {"m51_01_00_00", "Filianore's Rest"},
             {"m53_00_00_00", "Arena: Dragon Ruins"},
             {"m54_00_00_00", "Arena: Round Plaza"},
+        };
+        public Dictionary<string, string> BBNickNames = new Dictionary<string, string>(){
+            {"m21_00_00_00", "Hunter's Dream"},
+            {"m21_01_00_00", "Abandoned Old Workshop"},
+            {"m22_00_00_00", "Hemwick Charnel Lane"},
+            {"m23_0_00_00", "Old Yharnam"},
+            {"m24_00_00_00", "Cathedral Ward"},
+            {"m24_01_00_00", "Central Yharnam, Iosefka's Clinic"},
+            {"m24_02_00_00", "Cathedral Ward, Church Workshop, Altar"},
+            {"m25_00_00_00", "Forsaken Castle Cainhurst"},
+            {"m26_00_00_00", "Nightmare of Mensis"},
+            {"m27_00_00_00", "Forbidden Woods"},
+            {"m28_00_00_00", "Yahar'gul, Unseen Village"},
+        //	{"m29_", ""},
+            {"m32_00_00_00", "Byrgenwerth, Lecture Building, Lake"},
+            {"m33_00_00_00", "Nightmare Frontier"},
+            {"m34_00_00_00", "Hunter's Nightmare"},
+            {"m35_00_00_00", "Research Hall"},
+            {"m36_00_00_00", "Fishing Hamlet"},
+        };
+        public Dictionary<string, string> DeSNickNames = new Dictionary<string, string>(){
+            {"m01", "The Nexus"},
+            {"m02", "Boletarian Palace"},
+            {"m03", "Shrine of Storms"},
+            {"m04", "Tower of Latria"},
+            {"m05", "Valley of Defilement"},
+            {"m06", "Stonefang Tunnel"},
+            {"m07", "(Broken Archstone)"},
+            {"m08", "Tutorial"},
+        };
+        public Dictionary<string, string> SekiroNickNames = new Dictionary<string, string>(){
+            {"m10_00_00_00", "Hirata Estate"},
+            {"m11_00_00_00", "Ashina Outskirts"},
+            {"m11_01_00_00", "Ashina Castle"},
+            {"m11_02_00_00", "Ashina Reservoir"},
+            {"m13_00_00_00", "Abandoned Dungeon"},
+            {"m15_00_00_00", "Mibu Village"},
+            {"m17_00_00_00", "Sunken Valley"},
+            {"m20_00_00_00", "Senpou Temple, Mt. Kongo"},
+            {"m25_00_00_00", "Fountainhead Palace"},
         };
 
         public enum ViewMode
@@ -761,6 +842,8 @@ namespace StudioCore.MsbEditor
             switch(_assetLocator.Type)
             {
                 case GameType.DemonsSouls:
+                    if(DeSNickNames.ContainsKey(mapid))
+                        return mapid + " - " + DeSNickNames[mapid];
                     break;
                 case GameType.DarkSoulsPTDE:
                 case GameType.DarkSoulsRemastered:
@@ -768,14 +851,20 @@ namespace StudioCore.MsbEditor
                         return mapid + " - " + DS1NickNames[mapid];
                     break;
                 case GameType.DarkSoulsIISOTFS:
+                    if(DS2NickNames.ContainsKey(mapid))
+                        return mapid + " - " + DS2NickNames[mapid];
                     return mapid;
                 case GameType.DarkSoulsIII:
                     if(DS3NickNames.ContainsKey(mapid))
                         return mapid + " - " + DS3NickNames[mapid];
                     break;
                 case GameType.Bloodborne:
+                    if(BBNickNames.ContainsKey(mapid))
+                        return mapid + " - " + BBNickNames[mapid];
                     break;
                 case GameType.Sekiro:
+                    if(SekiroNickNames.ContainsKey(mapid))
+                        return mapid + " - " + SekiroNickNames[mapid];
                     break;
             }
             return mapid;
