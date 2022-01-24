@@ -61,7 +61,7 @@ namespace StudioCore.MsbEditor
 
         private bool _setNextFocus = false;
         
-        public Dictionary<string, string> DS1NickNames = new Dictionary<string, string>(){
+        private Dictionary<string, string> DS1NickNames = new Dictionary<string, string>(){
             {"m10_00_00_00", "The Depths"},
             {"m10_01_00_00", "Undead Burg/Parish"},
             {"m10_02_00_00", "Firelink"},
@@ -81,7 +81,7 @@ namespace StudioCore.MsbEditor
             {"m18_00_00_00", "Kiln of the First Flame"},
             {"m18_01_00_00", "Northern Undead Asylum"},
         };
-        public Dictionary<string, string> DS2NickNames = new Dictionary<string, string>(){
+        private Dictionary<string, string> DS2NickNames = new Dictionary<string, string>(){
             {"m10_02_00_00", "Things Betwixt"},
             {"m10_04_00_00", "Majula"},
             {"m10_10_00_00", "Forest of Fallen Giants"},
@@ -120,7 +120,7 @@ namespace StudioCore.MsbEditor
             {"m50_37_00_00", "Ivory King DLC"},
             {"m50_38_00_00", "Memory of Vendrick"},
         };
-        public Dictionary<string, string> DS3NickNames = new Dictionary<string, string>(){
+        private Dictionary<string, string> DS3NickNames = new Dictionary<string, string>(){
             {"m30_00_00_00", "High Wall of Lothric"},
             {"m30_01_00_00", "Lothric Castle"},
             {"m31_00_00_00", "Undead Settlement"},
@@ -143,7 +143,7 @@ namespace StudioCore.MsbEditor
             {"m53_00_00_00", "Arena: Dragon Ruins"},
             {"m54_00_00_00", "Arena: Round Plaza"},
         };
-        public Dictionary<string, string> BBNickNames = new Dictionary<string, string>(){
+        private Dictionary<string, string> BBNickNames = new Dictionary<string, string>(){
             {"m21_00_00_00", "Hunter's Dream"},
             {"m21_01_00_00", "Abandoned Old Workshop"},
             {"m22_00_00_00", "Hemwick Charnel Lane"},
@@ -162,7 +162,7 @@ namespace StudioCore.MsbEditor
             {"m35_00_00_00", "Research Hall"},
             {"m36_00_00_00", "Fishing Hamlet"},
         };
-        public Dictionary<string, string> DeSNickNames = new Dictionary<string, string>(){
+        private Dictionary<string, string> DeSNickNames = new Dictionary<string, string>(){
             {"m01", "The Nexus"},
             {"m02", "Boletarian Palace"},
             {"m03", "Shrine of Storms"},
@@ -172,7 +172,7 @@ namespace StudioCore.MsbEditor
             {"m07", "(Broken Archstone)"},
             {"m08", "Tutorial"},
         };
-        public Dictionary<string, string> SekiroNickNames = new Dictionary<string, string>(){
+        private Dictionary<string, string> SekiroNickNames = new Dictionary<string, string>(){
             {"m10_00_00_00", "Hirata Estate"},
             {"m11_00_00_00", "Ashina Outskirts"},
             {"m11_01_00_00", "Ashina Castle"},
@@ -232,6 +232,22 @@ namespace StudioCore.MsbEditor
             {
                 _viewMode = _settings.mapViewMode;
             }
+        }
+
+        private bool MouseInSceneTree()
+        {
+            Vector2 mp = InputTracker.MousePosition;
+            Vector2 p = ImGui.GetWindowPos();
+            Vector2 s = ImGui.GetWindowSize();
+            if ((int)mp.X < p.X || (int)mp.X >= p.X + s.X)
+            {
+                return false;
+            }
+            if ((int)mp.Y < p.Y || (int)mp.Y >= p.Y + s.Y)
+            {
+                return false;
+            }
+            return true;
         }
 
         private void RebuildTypeViewCache(Map map)
@@ -335,11 +351,12 @@ namespace StudioCore.MsbEditor
                 doSelect = true;
             }
             bool nodeopen = false;
+            bool selected = _selection.GetSelection().Contains(e);
             string padding = hierarchial ? "   " : "    ";
             if (hierarchial && e.Children.Count > 0)
             {
                 var treeflags = ImGuiTreeNodeFlags.OpenOnArrow | ImGuiTreeNodeFlags.SpanAvailWidth;
-                if ( _selection.GetSelection().Contains(e))
+                if ( selected)
                 {
                     treeflags |= ImGuiTreeNodeFlags.Selected;
                 }
@@ -354,7 +371,7 @@ namespace StudioCore.MsbEditor
             }
             else
             {
-                if (ImGui.Selectable(padding + e.PrettyName, _selection.GetSelection().Contains(e), ImGuiSelectableFlags.AllowDoubleClick | ImGuiSelectableFlags.AllowItemOverlap))
+                if (ImGui.Selectable(padding + e.PrettyName, selected, ImGuiSelectableFlags.AllowDoubleClick | ImGuiSelectableFlags.AllowItemOverlap))
                 {
                     // If double clicked frame the selection in the viewport
                     if (ImGui.IsMouseDoubleClicked(0))
@@ -366,6 +383,12 @@ namespace StudioCore.MsbEditor
                     }
                 }
             }
+
+            if(selected && InputTracker.GetKeyDown(Veldrid.Key.F) && MouseInSceneTree())//		F to scroll to selected Entity
+            {
+                ImGui.SetScrollHereY();
+            }
+
             if (ImGui.IsItemClicked(0))
             {
                 _pendingClick = e;

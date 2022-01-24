@@ -3,7 +3,7 @@ DS Map Studio is a standalone map editor for all the souls games. It is intended
 
 ## About This Fork:
 * To differentiate it from the 13 other forks of Katalash's work, while also tempering expectations, I have named this DS Map Studio Re(mastered). It makes some improvements over the original, but likely, not all the ones you wanted, and some major issues are not addressed.
-* I finished [TalkSickWaist](https://github.com/TalkSickWaist)'s partial reintegration of improvements [Philiquaz](https://github.com/Philiquaz) made to [DS Param Studio](https://github.com/Philiquaz/DSParamStudio).
+* I modified [TalkSickWaist](https://github.com/TalkSickWaist)'s partial reintegration of improvements [Philiquaz](https://github.com/Philiquaz) made to [DS Param Studio](https://github.com/Philiquaz/DSParamStudio) to remove compile errors.
 * Orbit controls have been added.
 * The Display Groups Editor now works.
 * Camera location/rotation saved and restored on project load.

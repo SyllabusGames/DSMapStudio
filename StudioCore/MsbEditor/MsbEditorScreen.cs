@@ -418,6 +418,12 @@ namespace StudioCore.MsbEditor
             {
                 EditorActionManager.RedoAction();
             }
+            // F key frames the selection
+            if (InputTracker.GetKeyDown(Key.F) && Viewport.MouseInViewport())
+            {
+                FrameSelection();
+            }
+
             if (!ViewportUsingKeyboard && !ImGui.GetIO().WantCaptureKeyboard)
             {
                 if (InputTracker.GetControlShortcut(Key.D) && _selection.IsSelection())
@@ -475,12 +481,6 @@ namespace StudioCore.MsbEditor
                         var action = new HideObjectsAction(Universe, _selection.GetFilteredSelection<MapEntity>().ToList());
                         EditorActionManager.ExecuteAction(action);
                     }
-                }
-
-                // F key frames the selection
-                if (InputTracker.GetKeyDown(Key.F))
-                {
-                    FrameSelection();
                 }
 
                 // Render settings

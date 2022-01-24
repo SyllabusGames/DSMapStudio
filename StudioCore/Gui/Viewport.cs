@@ -158,7 +158,7 @@ namespace StudioCore.Gui
             return new Ray(_worldView.CameraTransform.Position, worldCoords);
         }
 
-        private bool MouseInViewport()
+        public bool MouseInViewport()
         {
             var mp = InputTracker.MousePosition;
             if ((int)mp.X < X || (int)mp.X >= X + Width)
