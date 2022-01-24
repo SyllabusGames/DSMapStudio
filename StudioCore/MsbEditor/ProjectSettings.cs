@@ -30,6 +30,8 @@ namespace StudioCore.MsbEditor
         public float CameraOrbitCenterY { get; set; } = 0;
         public float CameraOrbitCenterZ { get; set; } = 0;
 
+        public bool RenderTypesMenuVisible { get; set; } = true;
+
         //		These fields are updated by WorldView.SetCameraLocation()
         public float OrbitCamDistance { get; set; } = 2;
 

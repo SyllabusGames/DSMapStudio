@@ -27,6 +27,7 @@ namespace StudioCore.Gui
         private Scene.RenderScene _renderScene;
         private Scene.SceneRenderPipeline _viewPipeline;
         private MsbEditor.Selection _selection;
+        private MsbEditor.ProjectSettings _settings;
 
         private int PrevWidth;
         private int PrevHeight;
@@ -57,6 +58,8 @@ namespace StudioCore.Gui
         private Scene.FullScreenQuad _clearQuad;
 
         private bool _vpvisible = false;
+
+        private bool _renderTypesMenuVisible = false;
 
         private string _vpid = "";
 
@@ -122,6 +125,12 @@ namespace StudioCore.Gui
             });
         }
 
+        public void LoadSettings (MsbEditor.ProjectSettings Settings)
+        {
+            _settings = Settings;
+            _renderTypesMenuVisible = _settings.RenderTypesMenuVisible;
+        }
+
         public Ray GetRay(float sx, float sy)
         {
             float x = (2.0f * sx) / Width - 1.0f;
@@ -171,6 +180,25 @@ namespace StudioCore.Gui
                 {
                     ImGui.Text("Viewport only works while docked to main window!");
                 }
+
+                ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding , 10);//		Round checkbox
+                ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing , new Vector2(3.0f, 0.0f));
+                ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.GetColumnWidth() - ImGui.GetScrollX() - 8);
+                bool unused = false;
+                ImGui.PushStyleColor(ImGuiCol.FrameBg, new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
+                if (ImGui.Checkbox($@"##RenderTypes", ref unused))
+                {
+                    _renderTypesMenuVisible = !_renderTypesMenuVisible;
+                    _settings.RenderTypesMenuVisible = _renderTypesMenuVisible;//		Update in settings so this will be saved on quit
+                }
+                ImGui.PopStyleColor();
+
+                if (_renderTypesMenuVisible)
+                {
+                    DrawRenderTypesMenu();
+                }
+                ImGui.PopStyleVar(2);
+
                 var p = ImGui.GetWindowPos();
                 var s = ImGui.GetWindowSize();
                 var newvp = new Veldrid.Rectangle((int)p.X, (int)p.Y + 3, (int)s.X, (int)s.Y - 3);
@@ -221,6 +249,88 @@ namespace StudioCore.Gui
             _worldView.UpdateBounds(newvp);
             float depth = device.IsDepthRangeZeroToOne ? 0 : 1;
             _renderViewport = new Veldrid.Viewport(newvp.X, newvp.Y, Width, Height, depth, 1.0f - depth);
+        }
+
+        private void DrawRenderTypesMenu()
+        {
+            string label;
+            uint drawFilter = (uint)_renderScene.DrawFilter;
+            bool[] flags = new bool[8]
+            {((drawFilter >> 0) & 0x1) > 0, ((drawFilter >> 1) & 0x1) > 0, ((drawFilter >> 2) & 0x1) > 0, ((drawFilter >> 3) & 0x1) > 0,
+            ((drawFilter >> 4) & 0x1) > 0, ((drawFilter >> 5) & 0x1) > 0, ((drawFilter >> 6) & 0x1) > 0, ((drawFilter >> 7) & 0x1) > 0 };
+            ImGui.SameLine();
+
+            label = "MapPiece";
+            ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.GetColumnWidth() - ImGui.GetScrollX() - ImGui.CalcTextSize(label).X - 33);
+            ImGui.Text(label);
+            ImGui.SameLine();
+            ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.GetColumnWidth() - ImGui.GetScrollX() - 30);//		Position the cursor so all checkboxes will fit
+            ImGui.PushStyleColor(ImGuiCol.FrameBg, new Vector4(0.3f, 0.8f, 0.3f, 1.0f));
+            if (ImGui.Checkbox($@"##MapPiece", ref flags[2]))
+            {
+                _renderScene.ToggleDrawFilter(Scene.RenderFilter.MapPiece);
+            }
+            ImGui.PopStyleColor();
+
+            label = "Collision";
+            ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.GetColumnWidth() - ImGui.GetScrollX() - ImGui.CalcTextSize(label).X - 33);
+            ImGui.Text(label);
+            ImGui.SameLine();
+            ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.GetColumnWidth() - ImGui.GetScrollX() - 30);
+            ImGui.PushStyleColor(ImGuiCol.FrameBg, new Vector4(0.1f, 0.33f, 0.55f, 1.0f));
+            if (ImGui.Checkbox($@"##Collision", ref flags[3]))
+            {
+                _renderScene.ToggleDrawFilter(Scene.RenderFilter.Collision);
+            }
+            ImGui.PopStyleColor();
+
+            label = "Character";
+            ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.GetColumnWidth() - ImGui.GetScrollX() - ImGui.CalcTextSize(label).X - 33);
+            ImGui.Text(label);
+            ImGui.SameLine();
+            ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.GetColumnWidth() - ImGui.GetScrollX() - 30);
+            ImGui.PushStyleColor(ImGuiCol.FrameBg, new Vector4(0.8f, 0.6f, 0.8f, 1.0f));
+            if (ImGui.Checkbox($@"##Character", ref flags[4]))
+            {
+                _renderScene.ToggleDrawFilter(Scene.RenderFilter.Character);
+            }
+            ImGui.PopStyleColor();
+
+            label = "Object";
+            ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.GetColumnWidth() - ImGui.GetScrollX() - ImGui.CalcTextSize(label).X - 33);
+            ImGui.Text(label);
+            ImGui.SameLine();
+            ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.GetColumnWidth() - ImGui.GetScrollX() - 30);
+            ImGui.PushStyleColor(ImGuiCol.Border, new Vector4(0.8f, 0.6f, 0.8f, 1.0f));
+            if (ImGui.Checkbox($@"##Object", ref flags[5]))
+            {
+                _renderScene.ToggleDrawFilter(Scene.RenderFilter.Object);
+            }
+            ImGui.PopStyleColor();
+
+            label = "Navmesh";
+            ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.GetColumnWidth() - ImGui.GetScrollX() - ImGui.CalcTextSize(label).X - 33);
+            ImGui.Text(label);
+            ImGui.SameLine();
+            ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.GetColumnWidth() - ImGui.GetScrollX() - 30);
+            ImGui.PushStyleColor(ImGuiCol.FrameBg, new Vector4(0.5f, 0.0f, 1.0f, 1.0f));
+            if (ImGui.Checkbox($@"##Navmesh", ref flags[6]))
+            {
+                _renderScene.ToggleDrawFilter(Scene.RenderFilter.Navmesh);
+            }
+            ImGui.PopStyleColor();
+
+            label = "Region";
+            ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.GetColumnWidth() - ImGui.GetScrollX() - ImGui.CalcTextSize(label).X - 33);
+            ImGui.Text(label);
+            ImGui.SameLine();
+            ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.GetColumnWidth() - ImGui.GetScrollX() - 30);
+            ImGui.PushStyleColor(ImGuiCol.Border, new Vector4(0.0f, 0.0f, 1.0f, 1.0f));
+            if (ImGui.Checkbox($@"##Region", ref flags[7]))
+            {
+                _renderScene.ToggleDrawFilter(Scene.RenderFilter.Region);
+            }
+            ImGui.PopStyleColor();
         }
 
         public bool Update(Sdl2Window window, float dt)
