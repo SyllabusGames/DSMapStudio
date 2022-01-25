@@ -902,6 +902,7 @@ namespace StudioCore.Resource
             }
             ImGui.Columns(1);
             ImGui.Separator();
+            PanWindow.PanWindowMiddleClick(30);
             ImGui.End();
         }
 

@@ -364,6 +364,7 @@ namespace StudioCore.MsbEditor
                 }
                 ImGui.PopStyleColor();
             }
+            PanWindow.PanWindowMiddleClick(20);
             ImGui.End();
         }
 

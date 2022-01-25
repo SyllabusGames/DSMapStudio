@@ -721,7 +721,9 @@ namespace StudioCore.MsbEditor
                     scrollTo = ImGui.GetCursorPosY();
             }
             if (doFocus)
-                    ImGui.SetScrollFromPosY(scrollTo - ImGui.GetScrollY());
+                ImGui.SetScrollFromPosY(scrollTo - ImGui.GetScrollY());
+
+            PanWindow.PanWindowMiddleClick(100);
             ImGui.EndChild();
             ImGui.NextColumn();
             if (!_selection.paramSelectionExists())
@@ -795,6 +797,7 @@ namespace StudioCore.MsbEditor
                 if (doFocus)
                     ImGui.SetScrollFromPosY(scrollTo - ImGui.GetScrollY());
             }
+            PanWindow.PanWindowMiddleClick(101);
             ImGui.EndChild();
             string _noSearchStr = null;
             ImGui.NextColumn();
@@ -809,6 +812,7 @@ namespace StudioCore.MsbEditor
                 ImGui.BeginChild("columns"+_selection.getActiveParam());
                 _propEditor.PropEditorParamRow(_selection.getActiveRow(), ref _noSearchStr);
             }
+            PanWindow.PanWindowMiddleClick(102);
             ImGui.EndChild();
         }
     }

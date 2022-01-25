@@ -93,6 +93,7 @@ namespace StudioCore.MsbEditor
                     ImGui.SetScrollHereY();
                 }
             }
+            PanWindow.PanWindowMiddleClick(10);
             ImGui.EndChild();
             ImGui.PopStyleVar();
             ImGui.NextColumn();
@@ -117,6 +118,7 @@ namespace StudioCore.MsbEditor
                     }
                 }
             }
+            PanWindow.PanWindowMiddleClick(11);
             ImGui.EndChild();
             ImGui.NextColumn();
             ImGui.BeginChild("text");
@@ -151,6 +153,7 @@ namespace StudioCore.MsbEditor
                 }
                 _propEditor.PropEditorFMGEnd();
             }
+            PanWindow.PanWindowMiddleClick(12);
             ImGui.EndChild();
         }
 
@@ -175,6 +178,7 @@ namespace StudioCore.MsbEditor
                     ImGui.SetScrollHereY();
                 }
             }
+            PanWindow.PanWindowMiddleClick(10);
             ImGui.EndChild();
             ImGui.NextColumn();
             ImGui.BeginChild("rows");
@@ -197,6 +201,7 @@ namespace StudioCore.MsbEditor
                     }
                 }
             }
+            PanWindow.PanWindowMiddleClick(11);
             ImGui.EndChild();
             ImGui.NextColumn();
             ImGui.BeginChild("text");
@@ -224,6 +229,7 @@ namespace StudioCore.MsbEditor
                 _propEditor.PropEditorFMG(_activeEntry, "Text", 160.0f);
                 _propEditor.PropEditorFMGEnd();
             }
+            PanWindow.PanWindowMiddleClick(12);
             ImGui.EndChild();
         }
 

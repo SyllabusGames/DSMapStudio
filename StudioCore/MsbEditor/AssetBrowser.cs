@@ -81,6 +81,7 @@ namespace StudioCore.MsbEditor
                         }
                     }
                 }
+                PanWindow.PanWindowMiddleClick(200);
                 ImGui.EndChild();
             }
             ImGui.End();

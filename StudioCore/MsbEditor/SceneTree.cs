@@ -819,6 +819,7 @@ namespace StudioCore.MsbEditor
                 {
                     ChaliceDungeonImportButton();
                 }
+                PanWindow.PanWindowMiddleClick(0);
                 ImGui.EndChild();
 
                 if (_dragDropSources.Count > 0)

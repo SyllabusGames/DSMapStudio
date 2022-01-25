@@ -1175,6 +1175,7 @@ namespace StudioCore.MsbEditor
             {//		An object is selected in the 3d view
                 PropEditorGeneric(selection);
             }
+            PanWindow.PanWindowMiddleClick(110);
             ImGui.EndChild();
             ImGui.End();
             ImGui.PopStyleColor();

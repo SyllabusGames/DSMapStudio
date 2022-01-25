@@ -73,6 +73,7 @@ namespace StudioCore.MsbEditor
             AssetLocator = locator;
             ResourceManager.Locator = AssetLocator;
             Window = window;
+            PanWindow.Window = window;
 
             Viewport = new Gui.Viewport("Mapeditvp", device, RenderScene, EditorActionManager, _selection, Rect.Width, Rect.Height);
             Universe = new Universe(AssetLocator, RenderScene, _selection);

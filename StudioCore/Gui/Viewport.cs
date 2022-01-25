@@ -227,6 +227,7 @@ namespace StudioCore.Gui
                 ImGui.Text($@"FLVER Read Caches Size: {Resource.FlverResource.CacheFootprint / 1024 / 1024} MB");
                 //ImGui.Text($@"Selected renderable:  { _viewPipeline._pickingEntity }");
             }
+            PanWindow.PanWindowMiddleClick(39);
             ImGui.End();
         }
 
