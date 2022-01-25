@@ -156,7 +156,7 @@ namespace StudioCore.MsbEditor
                         "How To Use"
                     );
                 }
-                cursorWindowPos = InputTracker.MousePosition - ImGui.GetWindowPos();
+                cursorWindowPos = InputTracker.MousePosition - ImGui.GetWindowPos() + new Vector2(0 , ImGui.GetScrollY());
 
                 
                 //		Mouse released, stop dragging layer settings

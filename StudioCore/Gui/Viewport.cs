@@ -254,6 +254,7 @@ namespace StudioCore.Gui
 
         private void DrawRenderTypesMenu()
         {
+			ImGui.PushStyleColor(ImGuiCol.Text , new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
             string label;
             uint drawFilter = (uint)_renderScene.DrawFilter;
             bool[] flags = new bool[8]
@@ -331,7 +332,7 @@ namespace StudioCore.Gui
             {
                 _renderScene.ToggleDrawFilter(Scene.RenderFilter.Region);
             }
-            ImGui.PopStyleColor();
+            ImGui.PopStyleColor(2);
         }
 
         public bool Update(Sdl2Window window, float dt)

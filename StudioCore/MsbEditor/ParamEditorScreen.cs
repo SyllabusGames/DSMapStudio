@@ -810,7 +810,7 @@ namespace StudioCore.MsbEditor
             else
             {
                 ImGui.BeginChild("columns"+_selection.getActiveParam());
-                _propEditor.PropEditorParamRow(_selection.getActiveRow(), ref _noSearchStr);
+                _propEditor.PropEditorParamRow(_selection.getActiveRow());
             }
             PanWindow.PanWindowMiddleClick(102);
             ImGui.EndChild();
