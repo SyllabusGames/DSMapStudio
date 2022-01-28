@@ -89,7 +89,7 @@
     <Field Def="s32 Souls" />
     <Field Def="s32 UnkD4" />
     <Field Def="f32 Damage / Aux Multiplier" />
-    <Field Def="f32 UnkDC" />
+		<Field Def="f32 Damage Multiplier" />
     <Field Def="f32 UnkE0" />
     <Field Def="f32 UnkE4" />
     <Field Def="f32 UnkE8" />
@@ -101,7 +101,9 @@
     <Field Def="f32 Unk100" />
     <Field Def="f32 Unk104" />
     <Field Def="f32 Unk108" />
-    <Field Def="f32 Unk10C" />
+		<Field Def="f32 Transparency">
+			<Description>0: Opaque, 100: Invisible</Description>
+		</Field>
     <Field Def="s32 Full Body SFX ID">
       <Description>Refers to ChrFullyBodySfxParam</Description>
     </Field>

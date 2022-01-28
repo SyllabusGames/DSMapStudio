@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Collections.Generic;
 using Veldrid;
 using Veldrid.Sdl2;
 using Veldrid.StartupUtilities;
@@ -451,6 +452,28 @@ namespace StudioCore
                     }
                 }
             }
+			
+			List<string> projects = new List<string>();
+			string thisProject;
+			//		Loop through all recent projects, removing any duplicates or projects that have been deleted
+			for (int i = 0 ; i < CFG.Current.RecentProjects.Count ; i++)
+			{
+				if(!File.Exists(CFG.Current.RecentProjects[i].ProjectFile))//		Remove deleted project
+				{
+					CFG.Current.RecentProjects.RemoveAt(i);
+					i--;
+					continue;
+				}
+				thisProject = CFG.Current.RecentProjects[i].Name + CFG.Current.RecentProjects[i].GameType + CFG.Current.RecentProjects[i].ProjectFile;
+				if (projects.Contains(thisProject))//		Remove duplicate project
+				{
+					CFG.Current.RecentProjects.RemoveAt(i);
+					i--;
+					continue;
+				}
+
+				projects.Add(thisProject);
+			}
             return success;
         }
 
