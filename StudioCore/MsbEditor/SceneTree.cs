@@ -861,34 +861,34 @@ namespace StudioCore.MsbEditor
             ImGui.End();
             ImGui.PopStyleColor();
         }
-
+        
         string GetMapNickName(string mapid){
             switch(_assetLocator.Type)
             {
                 case GameType.DemonsSouls:
                     if(DeSNickNames.ContainsKey(mapid))
-                        return mapid + ": " + DeSNickNames[mapid];
+                        return (_settings.DisplayMapId?(mapid):"") + (_settings.DisplayMapId&&_settings.DisplayMapName?": ":"") + (_settings.DisplayMapName?DeSNickNames[mapid]:"");
                     break;
                 case GameType.DarkSoulsPTDE:
                 case GameType.DarkSoulsRemastered:
                     if(DS1NickNames.ContainsKey(mapid))
-                        return mapid + ": " + DS1NickNames[mapid];
+                        return (_settings.DisplayMapId?(mapid):"") + (_settings.DisplayMapId&&_settings.DisplayMapName?": ":"") + (_settings.DisplayMapName?DS1NickNames[mapid]:"");
                     break;
                 case GameType.DarkSoulsIISOTFS:
                     if(DS2NickNames.ContainsKey(mapid))
-                        return mapid + ": " + DS2NickNames[mapid];
+                        return (_settings.DisplayMapId?(mapid):"") + (_settings.DisplayMapId&&_settings.DisplayMapName?": ":"") + (_settings.DisplayMapName?DS2NickNames[mapid]:"");
                     return mapid;
                 case GameType.DarkSoulsIII:
                     if(DS3NickNames.ContainsKey(mapid))
-                        return mapid + ": " + DS3NickNames[mapid];
+                        return (_settings.DisplayMapId?(mapid):"") + (_settings.DisplayMapId&&_settings.DisplayMapName?": ":"") + (_settings.DisplayMapName?DS3NickNames[mapid]:"");
                     break;
                 case GameType.Bloodborne:
                     if(BBNickNames.ContainsKey(mapid))
-                        return mapid + ": " + BBNickNames[mapid];
+                        return (_settings.DisplayMapId?(mapid):"") + (_settings.DisplayMapId&&_settings.DisplayMapName?": ":"") + (_settings.DisplayMapName?BBNickNames[mapid]:"");
                     break;
                 case GameType.Sekiro:
                     if(SekiroNickNames.ContainsKey(mapid))
-                        return mapid + ": " + SekiroNickNames[mapid];
+                        return (_settings.DisplayMapId?(mapid):"") + (_settings.DisplayMapId&&_settings.DisplayMapName?": ":"") + (_settings.DisplayMapName?SekiroNickNames[mapid]:"");
                     break;
             }
             return mapid;

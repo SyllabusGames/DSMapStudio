@@ -298,6 +298,25 @@ namespace StudioCore.MsbEditor
                     }
                     ImGui.EndMenu();
                 }
+                if (ImGui.BeginMenu("Map Name Format"))
+                {
+                    if (ImGui.MenuItem("m10_00_00_00", "", _projectSettings.DisplayMapId && !_projectSettings.DisplayMapName))
+                    {
+                        _projectSettings.DisplayMapId = true;
+                        _projectSettings.DisplayMapName = false;
+                    }
+                    if (ImGui.MenuItem("m10_02_00_00: Firelink", "", _projectSettings.DisplayMapId && _projectSettings.DisplayMapName))
+                    {
+                        _projectSettings.DisplayMapId = true;
+                        _projectSettings.DisplayMapName = true;
+                    }
+                    if (ImGui.MenuItem("Firelink", "", !_projectSettings.DisplayMapId && _projectSettings.DisplayMapName))
+                    {
+                        _projectSettings.DisplayMapId = false;
+                        _projectSettings.DisplayMapName = true;
+                    }
+                    ImGui.EndMenu();
+                }
                 if (ImGui.BeginMenu("Display Presets"))
                 {
                     if (ImGui.MenuItem("Map Piece/Character/Objects", "Ctrl-1"))

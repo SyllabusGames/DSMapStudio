@@ -45,6 +45,9 @@ namespace StudioCore.MsbEditor
 
         public SceneTree.ViewMode mapViewMode { get; set; } = SceneTree.ViewMode.Flat;
 
+        public bool DisplayMapId { get; set; } = true;
+        public bool DisplayMapName { get; set; } = true;
+
         /// <summary>
         /// Has different meanings depending on the game, but for supported games
         /// (DS2 and DS3) this means that params are written as "loose" i.e. outside
