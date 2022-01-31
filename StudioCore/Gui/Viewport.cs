@@ -239,6 +239,21 @@ namespace StudioCore.Gui
             ImGui.SliderFloat("Brightness", ref _viewPipeline.SceneParams.SceneBrightness, 0, 5);
         }
 
+        public void CameraParamsGui()
+        {
+            if(_worldView != null){	
+                if (ImGui.InputFloat("Near Clip", ref WorldView.NearClip))	
+                {
+                    WorldView.NearClip = Math.Clamp(WorldView.NearClip, 0.0001f, WorldView.FarClip);
+                }
+                if (ImGui.InputFloat("Far Clip", ref WorldView.FarClip))	
+                {
+                    WorldView.FarClip = Math.Clamp(WorldView.FarClip, WorldView.NearClip, 100000);
+                }
+                if (ImGui.SliderFloat("Field of View", ref WorldView.FieldOfView, 10, 120)){}
+            }
+        }
+
         public void ResizeViewport(GraphicsDevice device, Veldrid.Rectangle newvp)
         {
             PrevWidth = Width;
@@ -254,7 +269,7 @@ namespace StudioCore.Gui
 
         private void DrawRenderTypesMenu()
         {
-			ImGui.PushStyleColor(ImGuiCol.Text , new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
+            ImGui.PushStyleColor(ImGuiCol.Text , new Vector4(0.0f, 0.0f, 0.0f, 1.0f));
             string label;
             uint drawFilter = (uint)_renderScene.DrawFilter;
             bool[] flags = new bool[8]

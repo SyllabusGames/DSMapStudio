@@ -24,12 +24,9 @@ namespace StudioCore.MsbEditor
 
         private string _refContextCurrentAutoComplete = "";
 
-        private WorldView _worldView;//		Used to set camera properties
-
         public PropertyEditor(ActionManager manager, WorldView worldView = null)	
         {	
-            ContextActionManager = manager;	
-            _worldView = worldView;	
+            ContextActionManager = manager;
         }
 
         private bool PropertyRow(Type typ, object oldval, out object newval, bool isBool, Entity obj=null, string propname=null)
@@ -1095,24 +1092,7 @@ namespace StudioCore.MsbEditor
             ImGui.BeginChild("propedit");
             if (selection == null || selection.WrappedObject == null)
             {
-                ImGui.Text("Select a single object to edit properties.");	
-                if(_worldView != null){	
-                    if (ImGui.InputFloat("Near Clip", ref WorldView.NearClip))	
-                    {	
-                        WorldView.NearClip = Math.Clamp(WorldView.NearClip, 0.0001f, WorldView.FarClip);	
-                    }	
-                    if (ImGui.InputFloat("Far Clip", ref WorldView.FarClip))	
-                    {	
-                        WorldView.FarClip = Math.Clamp(WorldView.FarClip, WorldView.NearClip, 100000);	
-                    }	
-                    if (ImGui.SliderFloat("Field of View", ref WorldView.FieldOfView, 10, 120)){}	
-                    if (ImGui.Button("Reset camera matrix"))	
-                    {	
-                        WorldView.NearClip = 0.1f;	
-                        WorldView.FarClip = 20000;	
-                        WorldView.FieldOfView = 60;	
-                    }	
-                }
+                ImGui.Text("Select a single object to edit properties.");
                 ImGui.EndChild();
                 ImGui.End();
                 ImGui.PopStyleColor();

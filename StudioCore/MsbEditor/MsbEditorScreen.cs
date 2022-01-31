@@ -365,6 +365,11 @@ namespace StudioCore.MsbEditor
                     Viewport.SceneParamsGui();
                     ImGui.EndMenu();
                 }
+                if (ImGui.BeginMenu("Camera Settings"))
+                {
+                    Viewport.CameraParamsGui();
+                    ImGui.EndMenu();
+                }
                 CFG.Current.LastSceneFilter = RenderScene.DrawFilter;
                 ImGui.EndMenu();
             }
