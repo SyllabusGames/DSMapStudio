@@ -209,6 +209,9 @@ namespace StudioCore.MsbEditor
             }
             else
             {
+				if ((map.Name.StartsWith("m10_14") && modelname == "m0051") || (map.Name.StartsWith("m34_01") && modelname == "m102300"))
+					return null;//		These 2 models crash. Until this issue is resolved, just don't load them.
+
                 var res = ResourceManager.GetResource<Resource.FlverResource>(asset.AssetVirtualPath);
                 var model = MeshRenderableProxy.MeshRenderableFromFlverResource(_renderScene, res);
                 model.DrawFilter = filt;
@@ -457,20 +460,6 @@ namespace StudioCore.MsbEditor
             if (mapid.StartsWith("m29"))
             {
                 amapid = "m29_00_00_00";
-            }
-
-            if(_assetLocator.Type == GameType.DarkSoulsIISOTFS && amapid == "m10_14_00_00" && (_renderScene.DrawFilter & Scene.RenderFilter.MapPiece) > 0){
-                System.Windows.Forms.MessageBox.Show(
-                    "Brightstone Cove Tseldora usually crashes if map pieces are loaded.\nI have unloaded them for you. Do not re-enable them until Tseldora is unloaded." , 
-                    "Unloading Map Pieces");
-                _renderScene.DrawFilter &= ~Scene.RenderFilter.MapPiece;
-            }
-
-            if(_assetLocator.Type == GameType.DarkSoulsIII && amapid == "m34_01_00_00" && (_renderScene.DrawFilter & Scene.RenderFilter.MapPiece) > 0){
-                System.Windows.Forms.MessageBox.Show(
-                    "Grand Archives usually crashes if map pieces are loaded.\nI have unloaded them for you. Do not re-enable them until the Archives is unloaded." , 
-                    "Unloading Map Pieces");
-                _renderScene.DrawFilter &= ~Scene.RenderFilter.MapPiece;
             }
 
             foreach (var model in msb.Models.GetEntries())
