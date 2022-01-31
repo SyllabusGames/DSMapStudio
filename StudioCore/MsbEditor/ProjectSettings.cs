@@ -43,7 +43,8 @@ namespace StudioCore.MsbEditor
         public float FarClipPlane { get; set; } = 20000f;
         public float FieldOfView { get; set; } = 60f;
 
-        public SceneTree.ViewMode mapViewMode { get; set; } = SceneTree.ViewMode.Flat;
+        public SceneTree.ViewMode MapViewMode { get; set; } = SceneTree.ViewMode.Flat;
+        public bool MapButtons { get; set; } = true;
 
         public bool DisplayMapId { get; set; } = true;
         public bool DisplayMapName { get; set; } = true;

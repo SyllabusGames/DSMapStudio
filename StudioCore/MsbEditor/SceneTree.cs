@@ -230,7 +230,7 @@ namespace StudioCore.MsbEditor
             _settings = Settings;
             if (_settings != null)
             {
-                _viewMode = _settings.mapViewMode;
+                _viewMode = _settings.MapViewMode;
             }
         }
 
@@ -654,7 +654,7 @@ namespace StudioCore.MsbEditor
                         _viewMode = (ViewMode)mode;
                         if(_settings != null)//		Update default view mode
                         {
-                            _settings.mapViewMode = _viewMode;
+                            _settings.MapViewMode = _viewMode;
                         }
                     }
                 }
@@ -681,12 +681,19 @@ namespace StudioCore.MsbEditor
                     }
                     else//		Create map Load buttons
                     {
-                        ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(3,3));
-                        if(ImGui.Button($@" {ForkAwesome.Cube} {mapName}"))
+                        if (_settings.MapButtons)
                         {
-                            _universe.LoadMap(mapid);
+                            ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(3,3));
+                            if (ImGui.Button($@" {ForkAwesome.Cube} {mapName}"))
+                            {
+                                _universe.LoadMap(mapid);
+                            }
+                            ImGui.PopStyleVar();
                         }
-                        ImGui.PopStyleVar();
+                        else
+                        {
+                            ImGui.Selectable($@"   {ForkAwesome.Cube} {mapName}", false);
+                        }
                     }
 
                     // Right click context menu

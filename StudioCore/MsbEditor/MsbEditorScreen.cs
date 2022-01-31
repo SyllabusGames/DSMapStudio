@@ -266,6 +266,10 @@ namespace StudioCore.MsbEditor
                 {
                     Viewport.DrawGrid = !Viewport.DrawGrid;
                 }
+                if (ImGui.MenuItem("Map Load Buttons", "", _projectSettings.MapButtons))
+                {
+                    _projectSettings.MapButtons = !_projectSettings.MapButtons;
+                }
                 if (ImGui.BeginMenu("Object Types"))
                 {
                     if (ImGui.MenuItem("Debug", "", RenderScene.DrawFilter.HasFlag(Scene.RenderFilter.Debug)))

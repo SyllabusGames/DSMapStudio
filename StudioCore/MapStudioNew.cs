@@ -118,30 +118,30 @@ namespace StudioCore
 
             Scene.Renderer.Initialize(_gd);
             
-			try
-			{
-				ImguiRenderer = new ImGuiRenderer(_gd, _gd.SwapchainFramebuffer.OutputDescription, CFG.Current.GFX_Display_Width,
-					CFG.Current.GFX_Display_Height, ColorSpaceHandling.Legacy);
-			}
-			catch (Exception ex)
-			{
-				System.Windows.Forms.Clipboard.SetText("https://github.com/SyllabusGames/DSMapStudioRe/tree/master/Lib");
-			//	System.Windows.Forms.MessageBox.Show(ex.Source + "\n[" + ex.HResult.ToString() + "]");//		ImGui.NET [-2146233052]
-				System.Windows.Forms.MessageBox.Show("Please screenshot this so I know what broke.\n\nError: " + ex.Message + "\n\nBreach Site: " + ex.TargetSite.ToString() + "\n\nActually useful information: " + ex.StackTrace , ":(");//		Actual error message
-				if(System.Windows.Forms.MessageBox.Show("cimgui.dll doesn't seem to like you and is about to crash.\n"+
-					"You can try a different version from the Lib folder on DSMapStudioRe's Github.\n"+
-					"----- I just copied the Lib folder's url into your clipboard -----\n"+
+            try
+            {
+                ImguiRenderer = new ImGuiRenderer(_gd, _gd.SwapchainFramebuffer.OutputDescription, CFG.Current.GFX_Display_Width,
+                    CFG.Current.GFX_Display_Height, ColorSpaceHandling.Legacy);
+            }
+            catch (Exception ex)
+            {
+                System.Windows.Forms.Clipboard.SetText("https://github.com/SyllabusGames/DSMapStudioRe/tree/master/Lib");
+            //	System.Windows.Forms.MessageBox.Show(ex.Source + "\n[" + ex.HResult.ToString() + "]");//		ImGui.NET [-2146233052]
+                System.Windows.Forms.MessageBox.Show("Please screenshot this so I know what broke.\n\nError: " + ex.Message + "\n\nBreach Site: " + ex.TargetSite.ToString() + "\n\nActually useful information: " + ex.StackTrace , ":(");//		Actual error message
+                if(System.Windows.Forms.MessageBox.Show("cimgui.dll doesn't seem to like you and is about to crash.\n"+
+                    "You can try a different version from the Lib folder on DSMapStudioRe's Github.\n"+
+                    "----- I just copied the Lib folder's url into your clipboard -----\n"+
                     "Just copy a cimgui.dll_old#, rename to cimgui.dll, and overwrite the copy in this program’s folder.\n" + 
-					"If that doesn't work. You probably just have to use an older version of Map Studio. Sorry.\n\n"+
-					"Should I close the program before it crashes?" , 
-					"Well that's not good.", 
-					System.Windows.Forms.MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
-				{
-					Resource.ResourceManager.Shutdown();
-					_gd.Dispose();
-					System.Windows.Forms.Application.Exit();
-				}
-			}
+                    "If that doesn't work. You probably just have to use an older version of Map Studio. Sorry.\n\n"+
+                    "Should I close the program before it crashes?" , 
+                    "Well that's not good.", 
+                    System.Windows.Forms.MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
+                {
+                    Resource.ResourceManager.Shutdown();
+                    _gd.Dispose();
+                    System.Windows.Forms.Application.Exit();
+                }
+            }
 
             MainWindowCommandList = factory.CreateCommandList();
             GuiCommandList = factory.CreateCommandList();
@@ -286,7 +286,7 @@ namespace StudioCore
             Resource.ResourceManager.Shutdown();
             _gd.Dispose();
             CFG.Save();
-            if(_projectSettings != null)
+            if (_projectSettings != null)
                 _projectSettings.Serialize(CFG.Current.LastProjectFile);
 
             System.Windows.Forms.Application.Exit();
@@ -377,6 +377,9 @@ namespace StudioCore
 
         private bool AttemptLoadProject(ProjectSettings settings, string filename, bool updateRecents=true)
         {
+            if (_projectSettings != null)//		Save the previous project's settings
+                _projectSettings.Serialize(CFG.Current.LastProjectFile);
+
             bool success = true;
 
             // Check if game exe exists
@@ -452,28 +455,28 @@ namespace StudioCore
                     }
                 }
             }
-			
-			List<string> projects = new List<string>();
-			string thisProject;
-			//		Loop through all recent projects, removing any duplicates or projects that have been deleted
-			for (int i = 0 ; i < CFG.Current.RecentProjects.Count ; i++)
-			{
-				if(!File.Exists(CFG.Current.RecentProjects[i].ProjectFile))//		Remove deleted project
-				{
-					CFG.Current.RecentProjects.RemoveAt(i);
-					i--;
-					continue;
-				}
-				thisProject = CFG.Current.RecentProjects[i].Name + CFG.Current.RecentProjects[i].GameType + CFG.Current.RecentProjects[i].ProjectFile;
-				if (projects.Contains(thisProject))//		Remove duplicate project
-				{
-					CFG.Current.RecentProjects.RemoveAt(i);
-					i--;
-					continue;
-				}
+            
+            List<string> projects = new List<string>();
+            string thisProject;
+            //		Loop through all recent projects, removing any duplicates or projects that have been deleted
+            for (int i = 0 ; i < CFG.Current.RecentProjects.Count ; i++)
+            {
+                if(!File.Exists(CFG.Current.RecentProjects[i].ProjectFile))//		Remove deleted project
+                {
+                    CFG.Current.RecentProjects.RemoveAt(i);
+                    i--;
+                    continue;
+                }
+                thisProject = CFG.Current.RecentProjects[i].Name + CFG.Current.RecentProjects[i].GameType + CFG.Current.RecentProjects[i].ProjectFile;
+                if (projects.Contains(thisProject))//		Remove duplicate project
+                {
+                    CFG.Current.RecentProjects.RemoveAt(i);
+                    i--;
+                    continue;
+                }
 
-				projects.Add(thisProject);
-			}
+                projects.Add(thisProject);
+            }
             return success;
         }
 
@@ -511,14 +514,14 @@ namespace StudioCore
             ImGui.End();
 
             bool newProject = false;
-			if (InputTracker.GetControlShortcut(Key.N))
-			{
-				newProject = true;
-			}
-			if (InputTracker.GetControlShortcut(Key.S))
-			{
-				QuickSave();
-			}
+            if (InputTracker.GetControlShortcut(Key.N))
+            {
+                newProject = true;
+            }
+            if (InputTracker.GetControlShortcut(Key.S))
+            {
+                QuickSave();
+            }
 
             ImGui.PushStyleVar(ImGuiStyleVar.FrameBorderSize, 0.0f);
             if (ImGui.BeginMainMenuBar())
@@ -587,7 +590,7 @@ namespace StudioCore
                     
                     if (ImGui.MenuItem("Save", "Ctrl-S"))
                     {
-						QuickSave();
+                        QuickSave();
                     }
                     if (ImGui.MenuItem("Save All", ""))
                     {
@@ -889,9 +892,9 @@ namespace StudioCore
             }
             _firstframe = false;
         }
-		
-		private void QuickSave()
-		{
+        
+        private void QuickSave()
+        {
             if (_msbEditorFocused)
             {
                 MSBEditor.Save();
@@ -908,7 +911,7 @@ namespace StudioCore
             {
                 TextEditor.Save();
             }
-		}
+        }
 
         private void RecreateWindowFramebuffers(CommandList cl)
         {
