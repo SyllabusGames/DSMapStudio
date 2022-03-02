@@ -42,6 +42,16 @@ namespace StudioCore.MsbEditor
         private bool _chaliceLoadError = false;
 
         private bool _GCNeedsCollection = false;
+        
+        private List<Scene.ISelectable> rangeSelection = new List<Scene.ISelectable>();
+        private int rangeSelectionCount;//	These counts are used to check if the user has changed the selection throuhg means other than range select.
+        private int lastRangeSelectionCount = -1;//		Assigning negative values guarentees the code will create a new selection instead of trying to reuse an old start point.
+        private Scene.ISelectable selectionRangeEnd1;
+        private Scene.ISelectable selectionRangeEnd2;
+        private bool selectRange = false;
+        //		The objects the player had selected before doing a range select. This will be re-selected before doing a reSelectRange
+        private List<Scene.ISelectable> listPreRangeSelection = new List<Scene.ISelectable>();
+        private bool reSelectRange = false;//		The user has selected a range, then clicked another object while still holding shift
 
         private Dictionary<string, Dictionary<MapEntity.MapEntityType, Dictionary<Type, List<MapEntity>>>> _cachedTypeView = null;
 
@@ -487,13 +497,34 @@ namespace StudioCore.MsbEditor
                 {
                     var action = new MsbEditor.AddSelectionAction(_selection.universe, e);
                     _editorActionManager.ExecuteAction(action);
+                    lastRangeSelectionCount = -1;
+                }
+                else if ((InputTracker.GetKey(Key.ShiftLeft) || InputTracker.GetKey(Key.ShiftRight)) && _selection.GetFilteredSelection<Entity>().Count > 0)
+                {
+                    rangeSelectionCount = _selection.GetSelection().Count();
+                    if (rangeSelectionCount == lastRangeSelectionCount)//		The user is trying to adjust the last selection they made.
+                    {
+                        rangeSelection = listPreRangeSelection.ToList<Scene.ISelectable>();//		Use ToList to make a copy instead of a reference.
+                        selectionRangeEnd2 = e;//		Leave end1 where it was and just change end2 to be the element the user clicked on
+                        reSelectRange = true;
+                    }
+                    else
+                    {//		Normal Select Range
+                        rangeSelection.Clear();
+                        listPreRangeSelection = _selection.GetSelection().ToList<Scene.ISelectable>();
+                        selectionRangeEnd1 = _selection.GetSelection().Last<Scene.ISelectable>();
+                        selectionRangeEnd2 = e;
+                    }
+                    selectRange = true;
                 }
                 else if(!_selection.IsSelected(e) || _selection.GetSelection().Count > 1)//		If the object clicked on is not already the only selection
                 {
                     var action = new MsbEditor.SetSelectionAction(_selection.universe, e);
                     _editorActionManager.ExecuteAction(action);
+                    lastRangeSelectionCount = -1;
                 }
             }
+
 
             ImGui.PopID();
 
@@ -817,6 +848,44 @@ namespace StudioCore.MsbEditor
                         else if (_viewMode == ViewMode.ObjectType)
                         {
                             TypeView((Map)map);
+                        }
+
+                        if (selectRange)
+                        {
+                            bool inSelection = false;
+                            foreach (Scene.ISelectable ent in map.Objects)
+                            {
+                                if (ent == selectionRangeEnd2 || ent == selectionRangeEnd1)//		We have reached either end of the selection
+                                {
+                                    if (inSelection)//		We have reached the other end of the selection
+                                    {
+                                        rangeSelection.Add(ent);
+                                        break;
+                                    }
+                                    else//		We have reached the first end of the selection. Start selecting entities.
+                                    {
+                                        inSelection = true;
+                                    }
+                                }
+                                    
+                                if (inSelection)
+                                {
+                                    rangeSelection.Add(ent);
+                                }
+                            }
+                            if (reSelectRange)//	Set the selection range to rangeSelection which is everything that was selected before the range select started and everything between end1 and end2
+                            {
+                                var action = new MsbEditor.SetGroupSelectionAction(_selection.universe , rangeSelection);
+                                _editorActionManager.ExecuteAction(action);
+                                reSelectRange = false;
+                            }
+                            else
+                            {//	Add everything between end1 and end2 to the selection
+                                var action = new MsbEditor.AddSelectionSetAction(_selection.universe , rangeSelection);
+                                _editorActionManager.ExecuteAction(action);
+                            }
+                            lastRangeSelectionCount = _selection.GetSelection().Count();
+                            selectRange = false;
                         }
                         ImGui.PopStyleVar();
                         ImGui.TreePop();

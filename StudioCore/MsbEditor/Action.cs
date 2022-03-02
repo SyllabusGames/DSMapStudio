@@ -940,6 +940,39 @@ namespace StudioCore.MsbEditor
             return ActionEvent.NoEvent;
         }
     }
+    
+    public class SetGroupSelectionAction : Action
+    {
+        private Universe Universe;
+        private List<Scene.ISelectable> SelectThis;
+        private List<Scene.ISelectable> PreviousSelection = new List<Scene.ISelectable>();
+        
+        public SetGroupSelectionAction(Universe univ, List<Scene.ISelectable> entitiy)
+        {
+            Universe = univ;
+            SelectThis = entitiy;
+            PreviousSelection = Universe.Selection.GetSelection().ToList<Scene.ISelectable>();//	Cast to list so PreviousSelection is a copy, not a reference
+        }
+
+        public override ActionEvent Execute()
+        {
+            Universe.Selection.ClearSelection();
+            Universe.Selection.AddSelection(SelectThis);
+            return ActionEvent.NoEvent;
+        }
+
+        public override ActionEvent Undo()
+        {
+            Universe.Selection.ClearSelection();
+            foreach (Scene.ISelectable sel in PreviousSelection)//		For each element that was selected
+            {
+                if(sel != null){
+                    Universe.Selection.AddSelection(sel);
+                }
+            }
+            return ActionEvent.NoEvent;
+        }
+    }
 
     public class AddSelectionAction : Action
     {
@@ -970,6 +1003,46 @@ namespace StudioCore.MsbEditor
             return ActionEvent.NoEvent;
         }
     }
+
+    public class AddSelectionSetAction : Action
+    {
+        private Universe Universe;
+        private List<Scene.ISelectable> SelectThese;
+        private List<Scene.ISelectable> PreviousSelection = new List<Scene.ISelectable>();
+        
+        public AddSelectionSetAction(Universe univ, List<Scene.ISelectable> entities)
+        {
+            Universe = univ;
+            PreviousSelection = Universe.Selection.GetSelection().ToList<Scene.ISelectable>();//	Cast to list so PreviousSelection is a copy, not a reference
+            for(int i = entities.Count-1 ; i > -1 ; i--)
+            {
+                if(PreviousSelection.Contains(entities[i]))//		Remove duplicates
+                {
+                    entities.RemoveAt(i);
+                }
+            }
+            SelectThese = entities;
+        }
+
+        public override ActionEvent Execute()
+        {
+            Universe.Selection.AddSelection(SelectThese);
+            return ActionEvent.NoEvent;
+        }
+
+        public override ActionEvent Undo()
+        {
+            Universe.Selection.ClearSelection();
+            foreach (Scene.ISelectable sel in PreviousSelection)//		For each element that was selected
+            {
+                if(sel != null){
+                    Universe.Selection.AddSelection(sel);
+                }
+            }
+            return ActionEvent.NoEvent;
+        }
+    }
+
 
     public class ClearSelectionAction : Action
     {
