@@ -501,6 +501,7 @@ namespace StudioCore.MsbEditor
                 }
                 else if ((InputTracker.GetKey(Key.ShiftLeft) || InputTracker.GetKey(Key.ShiftRight)) && _selection.GetFilteredSelection<Entity>().Count > 0)
                 {
+                    selectRange = true;
                     rangeSelectionCount = _selection.GetSelection().Count();
                     if (rangeSelectionCount == lastRangeSelectionCount)//		The user is trying to adjust the last selection they made.
                     {
@@ -515,7 +516,11 @@ namespace StudioCore.MsbEditor
                         selectionRangeEnd1 = _selection.GetSelection().Last<Scene.ISelectable>();
                         selectionRangeEnd2 = e;
                     }
-                    selectRange = true;
+                    if (selectionRangeEnd1 == selectionRangeEnd2)//	Shift double clicked. Do not range select.
+                    {
+                        selectRange = false;
+                        reSelectRange = false;
+                    }
                 }
                 else if(!_selection.IsSelected(e) || _selection.GetSelection().Count > 1)//		If the object clicked on is not already the only selection
                 {

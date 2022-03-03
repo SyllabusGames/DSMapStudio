@@ -372,7 +372,7 @@ namespace StudioCore.Gui
                 if (_viewPipeline.PickingResultsReady)
                 {
                     var sel = _viewPipeline.GetSelection();
-                    if (InputTracker.GetKey(Key.ControlLeft) || InputTracker.GetKey(Key.ControlRight) || InputTracker.GetKey(Key.ShiftLeft) || InputTracker.GetKey(Key.ShiftRight))//		Add to selection
+                    if (InputTracker.GetKey(Key.ControlLeft) || InputTracker.GetKey(Key.ControlRight) || InputTracker.GetKey(Key.ShiftLeft) || InputTracker.GetKey(Key.ShiftRight))//		Toggle selection
                     {
                         if (sel != null)
                         {
