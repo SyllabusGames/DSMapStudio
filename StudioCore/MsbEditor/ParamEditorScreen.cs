@@ -227,7 +227,10 @@ namespace StudioCore.MsbEditor
         public List<PARAM.Row> getMatchingParamRows(PARAM param, Regex rownamerx){
             List<PARAM.Row> rlist = new List<PARAM.Row>();
             foreach(PARAM.Row row in param.Rows){
-                if(rownamerx.Match(row.Name==null?"":row.Name).Success){
+                if(row.Name==null){
+                    continue;
+                }
+                if(rownamerx.Match(row.Name).Success){
                     rlist.Add(row);
                 }
             }
@@ -256,7 +259,10 @@ namespace StudioCore.MsbEditor
                             continue;
                         }
                         PARAM.Row r = ParamBank.Params[rt][val];
-                        if(r!=null && rownamerx.Match(r.Name==null?"":r.Name).Success){
+                        if(r.Name==null){
+                            continue;
+                        }
+                        if(r!=null && rownamerx.Match(r.Name).Success){
                             rlist.Add(row);//don't add the ref'd row lol
                             break;//no need to check other refs
                         }
@@ -279,9 +285,7 @@ namespace StudioCore.MsbEditor
         }
         public bool matchNumExp(object val, string valexp){
             try{
-                Regex rx = new Regex(valexp);//just use regex even though it's not great for numbers
-                return rx.Match(val.ToString()).Success;
-                //return val.Equals(long.Parse(valexp));//basic right now and assumes long type, to be extended with x<y/100<z syntax nonsense
+                return val.Equals(long.Parse(valexp));//basic right now and assumes long type, to be extended with x<y/100<z syntax nonsense
             }catch(FormatException f){
                 //format error
                 return false;
@@ -315,26 +319,26 @@ namespace StudioCore.MsbEditor
                     }
                 }
                 if(cell.Value.GetType()==typeof(long)){
-                    return performBasicOperation<long>(cell, op, double.Parse(opparam));
+                    return performBasicOperation<long>(cell, op, long.Parse(opparam));
                 }else if(cell.Value.GetType()==typeof(int)){
-                    return performBasicOperation<int>(cell, op, double.Parse(opparam));
+                    return performBasicOperation<int>(cell, op, int.Parse(opparam));
                 }else if(cell.Value.GetType()==typeof(short)){
-                    return performBasicOperation<short>(cell, op, double.Parse(opparam));
+                    return performBasicOperation<short>(cell, op, short.Parse(opparam));
                 }else if(cell.Value.GetType()==typeof(ushort)){
-                    return performBasicOperation<ushort>(cell, op, double.Parse(opparam));
+                    return performBasicOperation<ushort>(cell, op, ushort.Parse(opparam));
                 }else if(cell.Value.GetType()==typeof(sbyte)){
-                    return performBasicOperation<sbyte>(cell, op, double.Parse(opparam));
+                    return performBasicOperation<sbyte>(cell, op, sbyte.Parse(opparam));
                 }else if(cell.Value.GetType()==typeof(byte)){
-                    return performBasicOperation<byte>(cell, op, double.Parse(opparam));
+                    return performBasicOperation<byte>(cell, op, byte.Parse(opparam));
                 }else if(cell.Value.GetType()==typeof(float)){
-                    return performBasicOperation<float>(cell, op, double.Parse(opparam));
+                    return performBasicOperation<float>(cell, op, float.Parse(opparam));
                 }
             }catch(FormatException f){
                 Console.WriteLine("Poorly formatted operation");
             }
             return null;
         }
-        public T performBasicOperation<T>(PARAM.Cell c, string op, double opparam) where T : struct, IFormattable{
+        public T performBasicOperation<T>(PARAM.Cell c, string op, T opparam) where T : struct, IFormattable{
             try{
                 dynamic val = c.Value;
                 dynamic opp = opparam;
