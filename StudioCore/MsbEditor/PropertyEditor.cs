@@ -185,90 +185,88 @@ namespace StudioCore.MsbEditor
             return false;
         }
 
-        private void UpdateProperty(object prop, Entity selection, object obj, object newval,
+        private void ChangeProperty(object prop, Entity selection, object obj, object newval,
             bool changed, bool committed, bool shouldUpdateVisual, int arrayindex = -1)
         {
             if (changed)
             {
-                ChangeProperty(prop, selection, obj, newval, ref committed, shouldUpdateVisual, arrayindex);
-            }
-            if (committed)
-            {
-                CommitProperty(selection);
-            }
-        }
-        private void ChangeProperty(object prop, Entity selection, object obj, object newval,
-            ref bool committed, bool shouldUpdateVisual, int arrayindex = -1)
-        {
-            if (prop == ChangingPropery && LastUncommittedAction != null && ContextActionManager.PeekUndoAction() == LastUncommittedAction)
-            {
-                ContextActionManager.UndoAction();
-            }
-            else
-            {
-                LastUncommittedAction = null;
-            }
-
-            if (ChangingObject != null && selection != null && selection.WrappedObject != ChangingObject)
-            {
-                committed = true;
-            }
-            else
-            {
-                PropertiesChangedAction action;
-                if (arrayindex != -1)
+                if (prop == ChangingPropery && LastUncommittedAction != null)
                 {
-                    action = new PropertiesChangedAction((PropertyInfo)prop, arrayindex, obj, newval);
+                    if (ContextActionManager.PeekUndoAction() == LastUncommittedAction)
+                    {
+                        ContextActionManager.UndoAction();
+                    }
+                    else
+                    {
+                        LastUncommittedAction = null;
+                    }
                 }
                 else
                 {
-                    action = new PropertiesChangedAction((PropertyInfo)prop, obj, newval);
+                    LastUncommittedAction = null;
                 }
-                if (shouldUpdateVisual && selection != null)
+
+                if (ChangingObject != null && selection != null && selection.WrappedObject != ChangingObject)
                 {
-                    action.SetPostExecutionAction((undo) =>
-                    {
-                        selection.UpdateRenderModel();
-                    });
+                    committed = true;
                 }
-                ContextActionManager.ExecuteAction(action);
-
-                LastUncommittedAction = action;
-                ChangingPropery = prop;
-                //ChangingObject = selection.MsbObject;
-                ChangingObject = selection != null ? selection.WrappedObject : obj;
-            }
-        }
-        private void CommitProperty(Entity selection)
-        {
-            // Invalidate name cache
-            if (selection != null)
-            {
-                selection.Name = null;
-            }
-
-            // Undo and redo the last action with a rendering update
-            if (LastUncommittedAction != null && ContextActionManager.PeekUndoAction() == LastUncommittedAction)
-            {
-                if (LastUncommittedAction is PropertiesChangedAction a)
+                else
                 {
-                    // Kinda a hack to prevent a jumping glitch
-                    a.SetPostExecutionAction(null);
-                    ContextActionManager.UndoAction();
-                    if (selection != null)
+                    PropertiesChangedAction action;
+                    if (arrayindex != -1)
                     {
-                        a.SetPostExecutionAction((undo) =>
+                        action = new PropertiesChangedAction((PropertyInfo)prop, arrayindex, obj, newval);
+                    }
+                    else
+                    {
+                        action = new PropertiesChangedAction((PropertyInfo)prop, obj, newval);
+                    }
+                    if (shouldUpdateVisual && selection != null)
+                    {
+                        action.SetPostExecutionAction((undo) =>
                         {
                             selection.UpdateRenderModel();
                         });
                     }
-                    ContextActionManager.ExecuteAction(a);
+                    ContextActionManager.ExecuteAction(action);
+
+                    LastUncommittedAction = action;
+                    ChangingPropery = prop;
+                    //ChangingObject = selection.MsbObject;
+                    ChangingObject = selection != null ? selection.WrappedObject : obj;
                 }
             }
+            if (committed)
+            {
+                // Invalidate name cache
+                if (selection != null)
+                {
+                    selection.Name = null;
+                }
 
-            LastUncommittedAction = null;
-            ChangingPropery = null;
-            ChangingObject = null;
+                // Undo and redo the last action with a rendering update
+                if (LastUncommittedAction != null && ContextActionManager.PeekUndoAction() == LastUncommittedAction)
+                {
+                    if (LastUncommittedAction is PropertiesChangedAction a)
+                    {
+                        // Kinda a hack to prevent a jumping glitch
+                        a.SetPostExecutionAction(null);
+                        ContextActionManager.UndoAction();
+                        if (selection != null)
+                        {
+                            a.SetPostExecutionAction((undo) =>
+                            {
+                                selection.UpdateRenderModel();
+                            });
+                        }
+                        ContextActionManager.ExecuteAction(a);
+                    }
+                }
+
+                LastUncommittedAction = null;
+                ChangingPropery = null;
+                ChangingObject = null;
+            }
         }
 
         private void PropEditorParamRow(Entity selection)
@@ -352,7 +350,7 @@ namespace StudioCore.MsbEditor
                     changed |= PropertyRowRefs(reftypes, oldval, ref newval);
                 }
             }
-            UpdateProperty(proprow, nullableSelection, paramRowOrCell, newval, changed, committed, false);
+            ChangeProperty(proprow, nullableSelection, paramRowOrCell, newval, changed, committed, false);
             ImGui.NextColumn();
             ImGui.PopID();
             id++;
@@ -466,7 +464,7 @@ namespace StudioCore.MsbEditor
             }
 
             bool committed = ImGui.IsItemDeactivatedAfterEdit();
-            UpdateProperty(entry.GetType().GetProperty("Text"), null, entry, newval, changed, committed, shouldUpdateVisual);
+            ChangeProperty(entry.GetType().GetProperty("Text"), null, entry, newval, changed, committed, shouldUpdateVisual);
 
             ImGui.NextColumn();
             ImGui.PopID();
@@ -594,7 +592,7 @@ namespace StudioCore.MsbEditor
                                     ImGui.SetItemDefaultFocus();
                                 }
                                 bool committed = ImGui.IsItemDeactivatedAfterEdit();
-                                UpdateProperty(prop, selection, obj, newval, changed, committed, shouldUpdateVisual, i);
+                                ChangeProperty(prop, selection, obj, newval, changed, committed, shouldUpdateVisual, i);
 
                                 ImGui.NextColumn();
                                 ImGui.PopID();
@@ -644,7 +642,7 @@ namespace StudioCore.MsbEditor
                                     ImGui.SetItemDefaultFocus();
                                 }
                                 bool committed = ImGui.IsItemDeactivatedAfterEdit();
-                                UpdateProperty(prop, selection, obj, newval, changed, committed, shouldUpdateVisual, i);
+                                ChangeProperty(prop, selection, obj, newval, changed, committed, shouldUpdateVisual, i);
 
                                 ImGui.NextColumn();
                                 ImGui.PopID();
@@ -684,7 +682,7 @@ namespace StudioCore.MsbEditor
                             ImGui.SetItemDefaultFocus();
                         }
                         bool committed = ImGui.IsItemDeactivatedAfterEdit();
-                        UpdateProperty(prop, selection, obj, newval, changed, committed, shouldUpdateVisual);
+                        ChangeProperty(prop, selection, obj, newval, changed, committed, shouldUpdateVisual);
 
                         ImGui.NextColumn();
                         ImGui.PopID();
