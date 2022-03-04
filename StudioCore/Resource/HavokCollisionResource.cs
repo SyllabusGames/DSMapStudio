@@ -391,7 +391,6 @@ namespace StudioCore.Resource
 
         bool IResource._Load(byte[] bytes, AccessLevel al, GameType type)
         {
-            
             if (type == GameType.Bloodborne)
             {
                 Hkx = HKX.Read(bytes, HKX.HKXVariation.HKXBloodBorne);
